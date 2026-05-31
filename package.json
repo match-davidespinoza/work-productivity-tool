@@ -1,7 +1,7 @@
 {
   "name": "jira-scanner",
-  "version": "1.0.0",
-  "description": "Local Electron app for scanning Jira issues",
+  "version": "2.0.0",
+  "description": "That Time My Homie Got Reincarnated as a Work Productivity Tool",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,7 +11,7 @@
   },
   "build": {
     "appId": "com.jirascanner.app",
-    "productName": "Jira Scanner",
+    "productName": "That Time My Homie Got Reincarnated as a Work Productivity Tool",
     "mac": {
       "target": "dmg",
       "identity": null,
@@ -27,5 +27,8 @@
   "devDependencies": {
     "electron": "^30",
     "electron-builder": "^24"
+  },
+  "dependencies": {
+    "marked": "^4.3.0"
   }
 }

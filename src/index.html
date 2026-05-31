@@ -3,52 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jira Scanner</title>
+  <title>That Time My Homie Got Reincarnated as a Work Productivity Tool</title>
   <style>
+    /* Catppuccin Mocha */
     :root {
-      --bg: #f5f5f7;
-      --surface: #ffffff;
-      --surface2: #f0f0f2;
-      --border: #e0e0e5;
-      --text: #1d1d1f;
-      --text2: #6e6e73;
-      --accent: #0071e3;
-      --accent-hover: #0077ed;
-      --danger: #ff3b30;
-      --warning: #ff9500;
-      --success: #34c759;
-      --badge-bg: #e8f0fe;
-      --badge-text: #1a73e8;
-      --high-bg: #fde8e8;
-      --high-text: #c5221f;
-      --card-selected: #e8f0fe;
-      --card-selected-border: #0071e3;
-      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
-      --radius: 10px;
-      --titlebar-height: 40px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1c1c1e;
-        --surface: #2c2c2e;
-        --surface2: #3a3a3c;
-        --border: #3a3a3c;
-        --text: #f5f5f7;
-        --text2: #98989d;
-        --accent: #0a84ff;
-        --accent-hover: #409cff;
-        --danger: #ff453a;
-        --warning: #ff9f0a;
-        --success: #32d74b;
-        --badge-bg: #1c3a6e;
-        --badge-text: #6ab0ff;
-        --high-bg: #3b1a1a;
-        --high-text: #ff6b6b;
-        --card-selected: #1c3a6e;
-        --card-selected-border: #0a84ff;
-        --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
-      }
+      --bg:                 #1e1e2e;
+      --surface:            #313244;
+      --surface2:           #45475a;
+      --border:             #313244;
+      --text:               #cdd6f4;
+      --text2:              #6c7086;
+      --accent:             #cba6f7;
+      --accent-hover:       #d4baff;
+      --danger:             #f38ba8;
+      --warning:            #f9e2af;
+      --success:            #a6e3a1;
+      --badge-bg:           #45475a;
+      --badge-text:         #cba6f7;
+      --high-bg:            rgba(243,139,168,0.2);
+      --high-text:          #f38ba8;
+      --card-selected:      rgba(203,166,247,0.15);
+      --card-selected-border: #cba6f7;
+      --shadow:             0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+      --radius:             10px;
+      --titlebar-height:    40px;
+      /* Work Tracker vars (overridden by theme) */
+      --wt-bg:         #1e1e2e;
+      --wt-sidebar-bg: #181825;
+      --wt-surface:    #313244;
+      --wt-surface2:   #45475a;
+      --wt-border:     #313244;
+      --wt-text:       #cdd6f4;
+      --wt-text-muted: #6c7086;
+      --wt-accent:     #cba6f7;
+      --wt-accent2:    #89b4fa;
+      --wt-danger:     #f38ba8;
+      --wt-warning:    #f9e2af;
+      --wt-radius:     8px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -154,7 +145,7 @@
       height: 32px;
       padding: 0 16px;
       background: var(--accent);
-      color: white;
+      color: #1e1e2e;
       border: none;
       border-radius: 6px;
       font-size: 13px;
@@ -210,7 +201,7 @@
       height: 36px;
       padding: 0 18px;
       background: var(--accent);
-      color: white;
+      color: #1e1e2e;
       border: none;
       border-radius: 6px;
       font-size: 13px;
@@ -401,10 +392,7 @@
       color: var(--high-text);
     }
 
-    .badge.done { background: #e6f4ea; color: #1e7e34; }
-    @media (prefers-color-scheme: dark) {
-      .badge.done { background: #1a3a22; color: #4ade80; }
-    }
+    .badge.done { background: rgba(166,227,161,0.2); color: #a6e3a1; }
 
     .issue-title {
       font-size: 13px;
@@ -516,19 +504,495 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+
+    /* ── Tabs ── */
+    #tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+
+    #home-btn {
+      height: 28px;
+      width: 32px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      -webkit-app-region: no-drag;
+      color: var(--text2);
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      margin-left: auto;
+    }
+    #home-btn:hover { color: var(--text); background: var(--surface2); }
+    #home-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab {
+      height: 28px;
+      padding: 0 14px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      -webkit-app-region: no-drag;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .tab:hover { color: var(--text); background: var(--surface2); }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .tab-panel.active { display: flex; }
+
+    /* ── Welcome screen ── */
+    #tab-home {
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+
+    .home-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px;
+    }
+
+    .home-title {
+      text-align: center;
+    }
+
+    .home-title h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .home-title p {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .home-cards {
+      display: flex;
+      gap: 20px;
+    }
+
+    .home-card {
+      width: 220px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      text-align: center;
+      -webkit-app-region: no-drag;
+    }
+
+    .home-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .home-card-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+
+    .home-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .home-card-desc {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+
+    .home-card.jira:hover { border-color: #89b4fa; }
+    .home-card.jira:hover .home-card-title { color: #89b4fa; }
+    .home-card.work-tracker:hover { border-color: var(--accent); }
+    .home-card.work-tracker:hover .home-card-title { color: var(--accent); }
+
+    /* ── Settings ── */
+    #tab-settings {
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .settings-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+
+    .settings-inner h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 32px;
+    }
+
+    .settings-section h3 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .theme-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, transform 0.1s;
+      -webkit-app-region: no-drag;
+    }
+
+    .theme-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .theme-card.active { border-color: var(--accent); }
+
+    .theme-swatches {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .theme-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .theme-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+    }
+
+    .theme-card.active .theme-name { color: var(--accent); }
+
+    #settings-gear {
+      height: 28px;
+      width: 28px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      -webkit-app-region: no-drag;
+      color: var(--text2);
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      margin-left: 2px;
+    }
+    #settings-gear:hover { color: var(--text); background: var(--surface2); }
+    #settings-gear.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .mode-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .mode-toggle-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .mode-pill {
+      display: flex;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .mode-pill button {
+      height: 28px;
+      padding: 0 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mode-pill button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Work Tracker — uses global theme vars ── */
+    #tab-work-tracker {
+      flex-direction: row;
+      background: var(--wt-bg);
+      color: var(--wt-text);
+    }
+
+    .wt-sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--wt-surface);
+      border-right: 1px solid var(--wt-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .wt-range-section { padding: 12px; border-bottom: 1px solid var(--wt-border); }
+
+    .wt-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+    .wt-presets .wt-preset:last-child { grid-column: span 3; }
+
+    .wt-preset {
+      background: var(--wt-surface2);
+      border: 1px solid transparent;
+      color: var(--wt-text-muted);
+      border-radius: 20px;
+      padding: 3px 9px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .wt-preset:hover { color: var(--wt-text); border-color: var(--wt-accent); }
+    .wt-preset.active { background: var(--wt-accent); color: #1e1e2e; border-color: var(--wt-accent); }
+
+    .wt-custom-range { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .wt-custom-range label { display: flex; flex-direction: column; gap: 3px; color: var(--wt-text-muted); font-size: 11px; }
+    .wt-custom-range input[type="date"] {
+      background: var(--wt-surface2);
+      border: 1px solid var(--wt-border);
+      border-radius: 6px;
+      color: var(--wt-text);
+      padding: 4px 8px;
+      font-size: 12px;
+      width: 100%;
+    }
+
+    .wt-source-presets { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .wt-source {
+      background: var(--wt-surface2);
+      border: 1px solid transparent;
+      color: var(--wt-text-muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 11px;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .wt-source:hover { color: var(--wt-text); border-color: var(--wt-accent); }
+    .wt-source.active { background: var(--wt-accent); color: #1e1e2e; font-weight: 600; }
+
+    .wt-generate-btn {
+      width: 100%;
+      background: var(--wt-accent);
+      color: #1e1e2e;
+      border: none;
+      border-radius: var(--wt-radius);
+      padding: 7px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .wt-generate-btn:hover { opacity: 0.85; }
+    .wt-generate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .wt-history-section { flex: 1; overflow-y: auto; padding: 10px; }
+    .wt-history-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--wt-text-muted); margin-bottom: 8px; }
+    .wt-history-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+    .wt-history-list li { display: flex; align-items: center; gap: 4px; border-radius: 6px; transition: background 0.1s; }
+    .wt-history-list li:hover { background: var(--wt-surface2); }
+    .wt-history-list li:hover .wt-delete-btn { opacity: 1; }
+
+    .wt-label-btn {
+      flex: 1;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--wt-text-muted);
+      padding: 5px 4px 5px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .wt-history-list li:hover .wt-label-btn { color: var(--wt-text); }
+    .wt-label-btn.active { color: var(--wt-accent); }
+
+    .wt-delete-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--wt-danger);
+      cursor: pointer;
+      opacity: 0;
+      padding: 3px 6px;
+      font-size: 12px;
+      border-radius: 4px;
+      transition: opacity 0.1s;
+    }
+    .wt-delete-btn:hover { background: rgba(255,59,48,0.1); }
+
+    .wt-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .wt-content { flex: 1; overflow-y: auto; padding: 28px 36px; }
+
+    .wt-empty-state { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--wt-text-muted); }
+
+    .wt-generating { height: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
+      40% { transform: translateY(-8px); opacity: 1; }
+    }
+    .wt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--wt-accent); animation: bounce 1.2s ease-in-out infinite; }
+    .wt-dot:nth-child(2) { animation-delay: 0.2s; }
+    .wt-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .wt-summary-toolbar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .wt-copy-btn {
+      background: var(--wt-surface);
+      border: 1px solid var(--wt-border);
+      color: var(--wt-text-muted);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .wt-copy-btn:hover { color: var(--wt-text); border-color: var(--wt-accent); }
+
+    .wt-markdown h2 { font-size: 17px; font-weight: 700; color: var(--wt-accent); margin-bottom: 16px; }
+    .wt-markdown h3 { font-size: 13px; font-weight: 600; color: var(--wt-text); margin: 16px 0 6px; }
+    .wt-markdown p { line-height: 1.7; margin-bottom: 10px; color: var(--wt-text); }
+    .wt-markdown ul { padding-left: 20px; margin-bottom: 10px; }
+    .wt-markdown li { line-height: 1.7; color: var(--wt-text); }
+    .wt-markdown hr { border: none; border-top: 1px solid var(--wt-border); margin: 20px 0; }
+    .wt-markdown code { background: var(--wt-surface2); border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+
+    .wt-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--wt-surface2);
+      border-top: 1px solid var(--wt-border);
+      font-size: 12px;
+      color: var(--wt-text-muted);
+    }
+    .wt-status-bar.hidden { display: none; }
+
+    .wt-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--wt-border);
+      border-top-color: var(--wt-accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: spin 0.8s linear infinite;
+    }
   </style>
 </head>
 <body>
 
   <div id="titlebar">
-    <span id="titlebar-title">Jira Scanner</span>
+    <div id="tab-bar">
+      <button class="tab" onclick="switchTab('jira')">Jira Scanner</button>
+      <button class="tab" onclick="switchTab('work-tracker')">Work Tracker</button>
+      <button id="home-btn" class="active" onclick="switchTab('home')" title="Home">⌂</button>
+      <button id="settings-gear" onclick="switchTab('settings')" title="Settings">⚙</button>
+    </div>
   </div>
+
+  <div id="tab-settings" class="tab-panel">
+    <div class="settings-inner">
+      <h2>Settings</h2>
+      <div class="mode-toggle-row">
+        <label>Appearance</label>
+        <div class="mode-pill" id="modePill">
+          <button onclick="setMode('light')" id="mode-light-btn">☀ Light</button>
+          <button onclick="setMode('dark')" id="mode-dark-btn">🌙 Dark</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Theme</h3>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-home" class="tab-panel active">
+    <div class="home-inner">
+      <div class="home-title">
+        <h1>That Time My Homie Got Reincarnated as a Work Productivity Tool</h1>
+        <p>Your personal engineering dashboard</p>
+      </div>
+      <div class="home-cards">
+        <div class="home-card jira" onclick="switchTab('jira')">
+          <div class="home-card-icon">🔍</div>
+          <div class="home-card-title">Jira Scanner</div>
+          <div class="home-card-desc">View recent comments, open tickets, high priority issues, and more</div>
+        </div>
+        <div class="home-card work-tracker" onclick="switchTab('work-tracker')">
+          <div class="home-card-icon">📊</div>
+          <div class="home-card-title">Work Tracker</div>
+          <div class="home-card-desc">Generate AI-powered summaries of your contributions across GitHub and Jira</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-jira" class="tab-panel">
 
   <div id="setup-banner">
     <h2>Connect to Jira</h2>
-    <p>Authenticate using the Atlassian CLI. Run <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px">acli jira auth</code> in your terminal, then click "Check Auth".</p>
+    <p>Sign in with your Atlassian account to get started.</p>
     <div class="setup-fields">
-      <button id="check-auth-btn" onclick="recheckAuth()" style="height:32px;padding:0 16px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag">Check Auth</button>
+      <button id="do-auth-btn" onclick="doAuth()" style="height:36px;padding:0 20px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag;display:flex;align-items:center;gap:8px">🔑 Sign in with Atlassian</button>
+      <button id="check-auth-btn" onclick="recheckAuth()" style="height:36px;padding:0 16px;background:var(--wt-surface2);color:var(--wt-text);border:1px solid var(--wt-border);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag">Check Auth</button>
     </div>
     <div id="auth-status" style="display:none;margin-top:12px;font-size:12px"></div>
   </div>
@@ -557,7 +1021,7 @@
         <span>Notifications</span>
       </label>
       <button id="settings-btn" onclick="toggleSetup()" title="Settings">⚙</button>
-      <button id="run-btn" onclick="runReport()">
+      <button id="run-btn" onclick="jiraResultsLoaded=false; runReport()">
         <span id="run-btn-icon">⟳</span>
         <span id="run-btn-label">Refresh Report</span>
       </button>
@@ -599,6 +1063,59 @@
     <div id="results"></div>
   </div>
 
+  </div><!-- #tab-jira -->
+
+  <div id="tab-work-tracker" class="tab-panel">
+    <div class="wt-sidebar">
+      <div class="wt-range-section">
+        <div class="wt-presets">
+          <button class="wt-preset" onclick="wtSelectPreset(this,'1')">24 h</button>
+          <button class="wt-preset" onclick="wtSelectPreset(this,'7')">1 week</button>
+          <button class="wt-preset active" onclick="wtSelectPreset(this,'14')">2 weeks</button>
+          <button class="wt-preset" onclick="wtSelectPreset(this,'30')">30 days</button>
+          <button class="wt-preset" onclick="wtSelectPreset(this,'90')">90 days</button>
+          <button class="wt-preset" onclick="wtSelectPreset(this,'ytd')">This year</button>
+          <button class="wt-preset" onclick="wtSelectPreset(this,'custom')">Custom</button>
+        </div>
+        <div class="wt-custom-range hidden" id="wtCustomRange">
+          <label>From <input type="date" id="wtSinceInput" onchange="wtCustomSince=this.value" /></label>
+          <label>To <input type="date" id="wtUntilInput" onchange="wtCustomUntil=this.value" /></label>
+        </div>
+        <div class="wt-source-presets">
+          <button class="wt-source active" onclick="wtSelectSource(this,'both')">Jira &amp; GitHub</button>
+          <button class="wt-source" onclick="wtSelectSource(this,'github')">GitHub only</button>
+          <button class="wt-source" onclick="wtSelectSource(this,'jira')">Jira only</button>
+        </div>
+        <div id="wtJiraAuthBanner" style="display:none;margin-bottom:10px;padding:8px 10px;background:rgba(255,149,0,0.15);border:1px solid var(--wt-warning);border-radius:6px;font-size:11px;color:var(--wt-text)">
+          <div style="font-weight:600;margin-bottom:4px">⚠ Jira not signed in</div>
+          <div style="color:var(--wt-text-muted);margin-bottom:8px">Jira data won't be included.</div>
+          <button onclick="wtJiraDoAuth()" id="wtJiraAuthBtn" style="width:100%;height:26px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">Sign in to Jira</button>
+        </div>
+        <div id="wtGhAuthBanner" style="display:none;margin-bottom:10px;padding:8px 10px;background:rgba(255,149,0,0.15);border:1px solid var(--wt-warning);border-radius:6px;font-size:11px;color:var(--wt-text)">
+          <div style="font-weight:600;margin-bottom:4px">⚠ GitHub not signed in</div>
+          <div style="color:var(--wt-text-muted);margin-bottom:8px">GitHub data won't be included.</div>
+          <button onclick="wtGhDoAuth()" id="wtGhAuthBtn" style="width:100%;height:26px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">Sign in to GitHub</button>
+        </div>
+        <button class="wt-generate-btn" id="wtGenerateBtn" onclick="wtGenerate()">Generate Summary</button>
+      </div>
+      <div class="wt-history-section">
+        <div class="wt-history-label">Past summaries</div>
+        <ul class="wt-history-list" id="wtHistoryList"></ul>
+      </div>
+    </div>
+    <div class="wt-main">
+      <div class="wt-content" id="wtContent">
+        <div class="wt-empty-state">
+          <p>Pick a time range and click <strong>Generate Summary</strong>.</p>
+        </div>
+      </div>
+      <div class="wt-status-bar hidden" id="wtStatusBar">
+        <span class="wt-spinner"></span>
+        <span id="wtStatusText">Gathering data…</span>
+      </div>
+    </div>
+  </div><!-- #tab-work-tracker -->
+
   <script>
     const { shell, ipcRenderer } = require('electron');
 
@@ -634,26 +1151,64 @@
     function setAuthStatus(type, msg) {
       const el = document.getElementById('auth-status');
       el.style.display = msg ? 'block' : 'none';
-      el.style.color = type === 'error' ? 'var(--danger)' : type === 'ok' ? 'var(--success)' : 'var(--text2)';
+      el.style.color = type === 'error' ? 'var(--wt-danger)' : type === 'ok' ? 'var(--success)' : 'var(--wt-text-muted)';
       el.textContent = msg;
     }
 
-    async function recheckAuth() {
-      const btn = document.getElementById('check-auth-btn');
+    async function doAuth() {
+      const btn = document.getElementById('do-auth-btn');
       btn.disabled = true;
-      btn.textContent = 'Checking…';
+      btn.textContent = '⟳ Opening Terminal…';
+      setAuthStatus('pending', '');
+      document.getElementById('auth-status').style.display = 'block';
+
+      const result = await ipcRenderer.invoke('acli-do-auth');
+      btn.disabled = false;
+      btn.textContent = '🔑 Sign in with Atlassian';
+
+      if (!result.pendingTerminal) {
+        setAuthStatus('error', 'Could not open Terminal: ' + (result.error || 'unknown error'));
+        return;
+      }
+
+      setAuthStatus('pending', 'Complete sign-in in the Terminal window…');
+
+      // Poll every 2s until auth succeeds, then proceed automatically
+      const pollTimer = setInterval(async () => {
+        const authResult = await ipcRenderer.invoke('acli-check-auth');
+        if (authResult.ok) {
+          clearInterval(pollTimer);
+          await recheckAuth();
+        }
+      }, 2000);
+
+      // Stop polling after 3 minutes if still not authenticated
+      setTimeout(() => {
+        clearInterval(pollTimer);
+        setAuthStatus('error', 'Timed out. Click "Check Auth" once you\'ve completed sign-in.');
+      }, 180000);
+    }
+
+    async function recheckAuth() {
+      const checkBtn = document.getElementById('check-auth-btn');
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'Checking…';
       setAuthStatus('pending', 'Checking authentication…');
       const result = await ipcRenderer.invoke('acli-check-auth');
-      btn.disabled = false;
-      btn.textContent = 'Check Auth';
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Check Auth';
+      const doAuthBtn = document.getElementById('do-auth-btn');
+      if (doAuthBtn) { doAuthBtn.disabled = false; doAuthBtn.textContent = '🔑 Sign in with Atlassian'; }
       if (result.ok) {
         acliAuthenticated = true;
-        setAuthStatus('ok', '✓ Authenticated');
+        const config = await ipcRenderer.invoke('acli-get-config');
+        if (config.ok) { jiraSiteUrl = 'https://' + config.site; myAccountId = config.accountId; }
+        setAuthStatus('ok', '✓ Signed in successfully');
         setTimeout(() => document.getElementById('setup-banner').classList.remove('visible'), 600);
         runReport();
         startPolling();
       } else {
-        setAuthStatus('error', 'Not authenticated. Run `acli jira auth` in your terminal.');
+        setAuthStatus('error', 'Not authenticated. Click "Sign in with Atlassian" to authenticate.');
       }
     }
 
@@ -755,25 +1310,39 @@
       document.querySelectorAll('.report-card').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
       selectedReport = el.dataset.report;
+      jiraResultsLoaded = false;
       runReport();
     }
 
     // ── Jira API (via acli) ───────────────────────────────────────────────────
 
-    async function acliSearch(jql, fields, limit) {
-      const result = await ipcRenderer.invoke('acli-search', { jql, fields, limit });
-      if (!result.ok) {
-        const err = new Error(result.error || 'acli error');
-        if (/network|connect|offline/i.test(result.error || '')) err.isNetworkError = true;
+    function handleAcliError(errorMsg) {
+      if (/unauthorized|auth login|not logged in|401/i.test(errorMsg || '')) {
+        acliAuthenticated = false;
+        setAuthStatus('error', 'Session expired. Run `acli jira auth login` in your terminal, then click "Check Auth".');
+        document.getElementById('setup-banner').classList.add('visible');
+        const authErr = new Error('Not authenticated — please re-run `acli jira auth login`');
+        authErr.isAuthError = true;
+        throw authErr;
+      }
+      if (/network|connect|offline/i.test(errorMsg || '')) {
+        const err = new Error('No internet connection');
+        err.isNetworkError = true;
         throw err;
       }
+      throw new Error(errorMsg || 'acli error');
+    }
+
+    async function acliSearch(jql, fields, limit) {
+      const result = await ipcRenderer.invoke('acli-search', { jql, fields, limit });
+      if (!result.ok) handleAcliError(result.error);
       const data = JSON.parse(result.body);
       return Array.isArray(data) ? data : (data.issues || []);
     }
 
     async function acliView(key, fields) {
       const result = await ipcRenderer.invoke('acli-view', { key, fields });
-      if (!result.ok) throw new Error(result.error || 'acli error');
+      if (!result.ok) handleAcliError(result.error);
       return JSON.parse(result.body);
     }
 
@@ -1061,11 +1630,12 @@
         }
 
         setResults(html, count);
+        jiraResultsLoaded = true;
       } catch (err) {
         if (err.isNetworkError) {
           setResults(offlineState(), null);
           waitForOnline();
-        } else {
+        } else if (!err.isAuthError) {
           setResults(errorState(err.message), null);
         }
       } finally {
@@ -1101,18 +1671,451 @@
         acliAuthenticated = true;
       } else {
         document.getElementById('setup-banner').classList.add('visible');
-        setAuthStatus('error', 'Run `acli jira auth` in your terminal to authenticate.');
+        setAuthStatus('error', 'Run `acli jira auth login` in your terminal to authenticate.');
         return;
       }
 
       startPolling();
-      if (!navigator.onLine) {
-        setResults(offlineState(), null);
-        waitForOnline();
-      } else {
-        runReport();
-      }
+      // Don't auto-run on startup — user starts on home screen
+      // Report will run when user navigates to the Jira tab
     })();
+
+    // ── Tab switching ─────────────────────────────────────────────────────────
+
+    function switchTab(name) {
+      const tabNames = ['jira', 'work-tracker'];
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', tabNames[i] === name);
+      });
+      document.getElementById('home-btn').classList.toggle('active', name === 'home');
+      const gear = document.getElementById('settings-gear');
+      if (gear) gear.classList.toggle('active', name === 'settings');
+
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+
+      if (name === 'settings') renderThemeGrid();
+      if (name === 'work-tracker') { wtLoadHistory(); wtCheckGhAuth(); wtCheckJiraAuth(); }
+      if (name === 'jira' && acliAuthenticated && !jiraResultsLoaded) runReport();
+    }
+
+    let jiraResultsLoaded = false;
+
+    // ── Work Tracker ──────────────────────────────────────────────────────────
+
+    let wtMode = '14';
+    let wtSource = 'both';
+    let wtCustomSince = (() => { const d = new Date(); d.setDate(d.getDate() - 14); return d.toISOString().split('T')[0]; })();
+    let wtCustomUntil = new Date().toISOString().split('T')[0];
+
+    document.getElementById('wtSinceInput').value = wtCustomSince;
+    document.getElementById('wtUntilInput').value = wtCustomUntil;
+
+    let wtGhPollTimer = null;
+    let wtJiraPollTimer = null;
+
+    async function wtCheckJiraAuth() {
+      const result = await ipcRenderer.invoke('acli-check-auth');
+      const banner = document.getElementById('wtJiraAuthBanner');
+      if (banner) banner.style.display = result.ok ? 'none' : 'block';
+      return result.ok;
+    }
+
+    async function wtJiraDoAuth() {
+      const btn = document.getElementById('wtJiraAuthBtn');
+      btn.disabled = true;
+      btn.textContent = '⟳ Opening Terminal…';
+      const result = await ipcRenderer.invoke('acli-do-auth');
+      btn.disabled = false;
+      btn.textContent = 'Sign in to Jira';
+      if (!result.pendingTerminal) return;
+
+      if (wtJiraPollTimer) clearInterval(wtJiraPollTimer);
+      wtJiraPollTimer = setInterval(async () => {
+        const ok = await wtCheckJiraAuth();
+        if (ok) { clearInterval(wtJiraPollTimer); wtJiraPollTimer = null; }
+      }, 2000);
+      setTimeout(() => { if (wtJiraPollTimer) { clearInterval(wtJiraPollTimer); wtJiraPollTimer = null; } }, 180000);
+    }
+
+    async function wtCheckGhAuth() {
+      const result = await ipcRenderer.invoke('wt-gh-auth-status');
+      const banner = document.getElementById('wtGhAuthBanner');
+      if (banner) banner.style.display = result.ok ? 'none' : 'block';
+      return result.ok;
+    }
+
+    async function wtGhDoAuth() {
+      const btn = document.getElementById('wtGhAuthBtn');
+      btn.disabled = true;
+      btn.textContent = '⟳ Opening Terminal…';
+      const result = await ipcRenderer.invoke('wt-gh-do-auth');
+      btn.disabled = false;
+      btn.textContent = 'Sign in to GitHub';
+      if (!result.pendingTerminal) return;
+
+      if (wtGhPollTimer) clearInterval(wtGhPollTimer);
+      wtGhPollTimer = setInterval(async () => {
+        const ok = await wtCheckGhAuth();
+        if (ok) {
+          clearInterval(wtGhPollTimer);
+          wtGhPollTimer = null;
+        }
+      }, 2000);
+
+      setTimeout(() => { if (wtGhPollTimer) { clearInterval(wtGhPollTimer); wtGhPollTimer = null; } }, 180000);
+    }
+
+    function wtSelectPreset(btn, mode) {
+      document.querySelectorAll('.wt-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      wtMode = mode;
+      document.getElementById('wtCustomRange').classList.toggle('hidden', mode !== 'custom');
+    }
+
+    function wtSelectSource(btn, source) {
+      document.querySelectorAll('.wt-source').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      wtSource = source;
+    }
+
+    function wtResolveRange() {
+      if (wtMode === 'custom') return { since: wtCustomSince, until: wtCustomUntil, label: `${wtCustomSince} to ${wtCustomUntil}` };
+      if (wtMode === 'ytd') return { since: new Date().getFullYear() + '-01-01', until: 'present', label: 'this year' };
+      const days = parseInt(wtMode, 10);
+      const d = new Date(); d.setDate(d.getDate() - days);
+      const labels = { 1: 'last 24 hours', 7: 'last week', 14: 'last 2 weeks', 30: 'last 30 days', 90: 'last 90 days' };
+      return { since: d.toISOString().split('T')[0], until: 'present', label: labels[days] || `last ${days} days` };
+    }
+
+    async function wtGenerate() {
+      const btn = document.getElementById('wtGenerateBtn');
+      const statusBar = document.getElementById('wtStatusBar');
+      const statusText = document.getElementById('wtStatusText');
+      const content = document.getElementById('wtContent');
+      let stepTimer = null;
+
+      try {
+        const { since, until, label } = wtResolveRange();
+
+        btn.disabled = true;
+        statusBar.classList.remove('hidden');
+        content.innerHTML = '<div class="wt-generating"><span class="wt-dot"></span><span class="wt-dot"></span><span class="wt-dot"></span></div>';
+
+        const steps = ['Fetching GitHub PRs…', 'Scanning git commits…', 'Pulling Jira activity…', 'Generating summary…'];
+        let step = 0;
+        statusText.textContent = steps[step];
+        stepTimer = setInterval(() => { step = (step + 1) % steps.length; statusText.textContent = steps[step]; }, 2500);
+
+        const { summary, filename } = await ipcRenderer.invoke('wt-generate', { since, until, label, source: wtSource });
+        clearInterval(stepTimer);
+        if (!summary) {
+          content.innerHTML = '<div class="wt-empty-state"><p>No activity found for this period.</p></div>';
+          statusBar.classList.add('hidden');
+        } else {
+          await wtShowSummary(summary);
+          await wtLoadHistory(filename);
+          statusText.textContent = `Saved as ${filename}`;
+          setTimeout(() => statusBar.classList.add('hidden'), 3000);
+        }
+      } catch (err) {
+        if (stepTimer) clearInterval(stepTimer);
+        statusBar.classList.remove('hidden');
+        statusText.textContent = `Error: ${err.message}`;
+        content.innerHTML = `<div class="wt-markdown"><p style="color:var(--wt-danger)">${escHtml(err.message)}</p></div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function wtShowSummary(md) {
+      const { marked } = require('marked');
+      const content = document.getElementById('wtContent');
+      content.innerHTML = `
+        <div class="wt-summary-toolbar">
+          <button class="wt-copy-btn" id="wtCopyBtn">⎘ Copy</button>
+        </div>
+        <div class="wt-markdown">${marked.parse(md)}</div>`;
+      document.getElementById('wtCopyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(md).then(() => {
+          const b = document.getElementById('wtCopyBtn');
+          b.textContent = '✓ Copied';
+          setTimeout(() => { b.textContent = '⎘ Copy'; }, 2000);
+        });
+      });
+    }
+
+    async function wtLoadHistory(activeFilename) {
+      const summaries = await ipcRenderer.invoke('wt-list-summaries');
+      const list = document.getElementById('wtHistoryList');
+      list.innerHTML = '';
+      summaries.forEach(({ filename, label }) => {
+        const li = document.createElement('li');
+        const labelBtn = document.createElement('button');
+        labelBtn.className = 'wt-label-btn' + (filename === activeFilename ? ' active' : '');
+        labelBtn.textContent = label;
+        labelBtn.title = filename;
+        labelBtn.addEventListener('click', async () => {
+          document.querySelectorAll('.wt-label-btn').forEach(b => b.classList.remove('active'));
+          labelBtn.classList.add('active');
+          const md = await ipcRenderer.invoke('wt-read-summary', filename);
+          wtShowSummary(md);
+        });
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'wt-delete-btn';
+        deleteBtn.title = 'Delete';
+        deleteBtn.textContent = '🗑';
+        deleteBtn.addEventListener('click', async () => {
+          await ipcRenderer.invoke('wt-delete-summary', filename);
+          li.remove();
+          if (labelBtn.classList.contains('active')) {
+            document.getElementById('wtContent').innerHTML = '<div class="wt-empty-state"><p>Pick a time range and click <strong>Generate Summary</strong>.</p></div>';
+          }
+        });
+        li.appendChild(labelBtn);
+        li.appendChild(deleteBtn);
+        list.appendChild(li);
+      });
+    }
+
+
+    // ── Theme system ─────────────────────────────────────────────────────────
+
+    const THEMES = {
+      mocha: {
+        name: 'Catppuccin',
+        dark: {
+          swatches: ['#1e1e2e','#313244','#cba6f7','#cdd6f4'],
+          vars: {
+            '--bg':'#1e1e2e','--surface':'#313244','--surface2':'#45475a',
+            '--border':'#313244','--text':'#cdd6f4','--text2':'#6c7086',
+            '--accent':'#cba6f7','--accent-hover':'#d4baff',
+            '--danger':'#f38ba8','--warning':'#f9e2af','--success':'#a6e3a1',
+            '--badge-bg':'#45475a','--badge-text':'#cba6f7',
+            '--high-bg':'rgba(243,139,168,0.2)','--high-text':'#f38ba8',
+            '--card-selected':'rgba(203,166,247,0.15)','--card-selected-border':'#cba6f7',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+            '--wt-bg':'#1e1e2e','--wt-sidebar-bg':'#181825','--wt-surface':'#313244',
+            '--wt-surface2':'#45475a','--wt-border':'#313244','--wt-text':'#cdd6f4',
+            '--wt-text-muted':'#6c7086','--wt-accent':'#cba6f7','--wt-accent2':'#89b4fa',
+            '--wt-danger':'#f38ba8','--wt-warning':'#f9e2af',
+          },
+        },
+        light: {
+          swatches: ['#eff1f5','#e6e9ef','#8839ef','#4c4f69'],
+          vars: {
+            '--bg':'#eff1f5','--surface':'#e6e9ef','--surface2':'#ccd0da',
+            '--border':'#ccd0da','--text':'#4c4f69','--text2':'#6c6f85',
+            '--accent':'#8839ef','--accent-hover':'#9b4dff',
+            '--danger':'#d20f39','--warning':'#df8e1d','--success':'#40a02b',
+            '--badge-bg':'#ccd0da','--badge-text':'#8839ef',
+            '--high-bg':'rgba(210,15,57,0.12)','--high-text':'#d20f39',
+            '--card-selected':'rgba(136,57,239,0.1)','--card-selected-border':'#8839ef',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06)',
+            '--wt-bg':'#eff1f5','--wt-sidebar-bg':'#e6e9ef','--wt-surface':'#dce0e8',
+            '--wt-surface2':'#ccd0da','--wt-border':'#ccd0da','--wt-text':'#4c4f69',
+            '--wt-text-muted':'#6c6f85','--wt-accent':'#8839ef','--wt-accent2':'#209fb5',
+            '--wt-danger':'#d20f39','--wt-warning':'#df8e1d',
+          },
+        },
+      },
+      classic: {
+        name: 'Classic',
+        dark: {
+          swatches: ['#1c1c1e','#2c2c2e','#0a84ff','#f5f5f7'],
+          vars: {
+            '--bg':'#1c1c1e','--surface':'#2c2c2e','--surface2':'#3a3a3c',
+            '--border':'#3a3a3c','--text':'#f5f5f7','--text2':'#98989d',
+            '--accent':'#0a84ff','--accent-hover':'#409cff',
+            '--danger':'#ff453a','--warning':'#ff9f0a','--success':'#32d74b',
+            '--badge-bg':'#1c3a6e','--badge-text':'#6ab0ff',
+            '--high-bg':'rgba(255,69,58,0.2)','--high-text':'#ff6b6b',
+            '--card-selected':'rgba(10,132,255,0.15)','--card-selected-border':'#0a84ff',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+            '--wt-bg':'#1c1c1e','--wt-sidebar-bg':'#161618','--wt-surface':'#2c2c2e',
+            '--wt-surface2':'#3a3a3c','--wt-border':'#3a3a3c','--wt-text':'#f5f5f7',
+            '--wt-text-muted':'#98989d','--wt-accent':'#0a84ff','--wt-accent2':'#32ade6',
+            '--wt-danger':'#ff453a','--wt-warning':'#ff9f0a',
+          },
+        },
+        light: {
+          swatches: ['#f5f5f7','#ffffff','#0071e3','#1d1d1f'],
+          vars: {
+            '--bg':'#f5f5f7','--surface':'#ffffff','--surface2':'#f0f0f2',
+            '--border':'#e0e0e5','--text':'#1d1d1f','--text2':'#6e6e73',
+            '--accent':'#0071e3','--accent-hover':'#0077ed',
+            '--danger':'#ff3b30','--warning':'#ff9500','--success':'#34c759',
+            '--badge-bg':'#e8f0fe','--badge-text':'#1a73e8',
+            '--high-bg':'#fde8e8','--high-text':'#c5221f',
+            '--card-selected':'#e8f0fe','--card-selected-border':'#0071e3',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06)',
+            '--wt-bg':'#f5f5f7','--wt-sidebar-bg':'#e8e8ed','--wt-surface':'#ffffff',
+            '--wt-surface2':'#f0f0f2','--wt-border':'#e0e0e5','--wt-text':'#1d1d1f',
+            '--wt-text-muted':'#6e6e73','--wt-accent':'#0071e3','--wt-accent2':'#34aadc',
+            '--wt-danger':'#ff3b30','--wt-warning':'#ff9500',
+          },
+        },
+      },
+      dracula: {
+        name: 'Dracula',
+        dark: {
+          swatches: ['#282a36','#373948','#bd93f9','#f8f8f2'],
+          vars: {
+            '--bg':'#282a36','--surface':'#373948','--surface2':'#44475a',
+            '--border':'#44475a','--text':'#f8f8f2','--text2':'#6272a4',
+            '--accent':'#bd93f9','--accent-hover':'#caa8ff',
+            '--danger':'#ff5555','--warning':'#ffb86c','--success':'#50fa7b',
+            '--badge-bg':'#44475a','--badge-text':'#bd93f9',
+            '--high-bg':'rgba(255,85,85,0.2)','--high-text':'#ff5555',
+            '--card-selected':'rgba(189,147,249,0.15)','--card-selected-border':'#bd93f9',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3)',
+            '--wt-bg':'#282a36','--wt-sidebar-bg':'#21222c','--wt-surface':'#373948',
+            '--wt-surface2':'#44475a','--wt-border':'#44475a','--wt-text':'#f8f8f2',
+            '--wt-text-muted':'#6272a4','--wt-accent':'#bd93f9','--wt-accent2':'#8be9fd',
+            '--wt-danger':'#ff5555','--wt-warning':'#ffb86c',
+          },
+        },
+        light: {
+          swatches: ['#f8f8f4','#f0f0ea','#7c4dcc','#2d2d3f'],
+          vars: {
+            '--bg':'#f8f8f4','--surface':'#f0f0ea','--surface2':'#e4e4dc',
+            '--border':'#d8d8ce','--text':'#2d2d3f','--text2':'#7b7b8c',
+            '--accent':'#7c4dcc','--accent-hover':'#8e5de0',
+            '--danger':'#cc3333','--warning':'#cc7700','--success':'#228833',
+            '--badge-bg':'#e4e4dc','--badge-text':'#7c4dcc',
+            '--high-bg':'rgba(204,51,51,0.1)','--high-text':'#cc3333',
+            '--card-selected':'rgba(124,77,204,0.1)','--card-selected-border':'#7c4dcc',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06)',
+            '--wt-bg':'#f8f8f4','--wt-sidebar-bg':'#f0f0ea','--wt-surface':'#e8e8e0',
+            '--wt-surface2':'#dcdcd4','--wt-border':'#d4d4cc','--wt-text':'#2d2d3f',
+            '--wt-text-muted':'#7b7b8c','--wt-accent':'#7c4dcc','--wt-accent2':'#00b5cc',
+            '--wt-danger':'#cc3333','--wt-warning':'#cc7700',
+          },
+        },
+      },
+      tokyo: {
+        name: 'Tokyo Night',
+        dark: {
+          swatches: ['#1a1b26','#24283b','#7aa2f7','#c0caf5'],
+          vars: {
+            '--bg':'#1a1b26','--surface':'#24283b','--surface2':'#292e42',
+            '--border':'#292e42','--text':'#c0caf5','--text2':'#565f89',
+            '--accent':'#7aa2f7','--accent-hover':'#90b5ff',
+            '--danger':'#f7768e','--warning':'#e0af68','--success':'#9ece6a',
+            '--badge-bg':'#292e42','--badge-text':'#7aa2f7',
+            '--high-bg':'rgba(247,118,142,0.2)','--high-text':'#f7768e',
+            '--card-selected':'rgba(122,162,247,0.15)','--card-selected-border':'#7aa2f7',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3)',
+            '--wt-bg':'#1a1b26','--wt-sidebar-bg':'#16161e','--wt-surface':'#24283b',
+            '--wt-surface2':'#292e42','--wt-border':'#292e42','--wt-text':'#c0caf5',
+            '--wt-text-muted':'#565f89','--wt-accent':'#7aa2f7','--wt-accent2':'#bb9af7',
+            '--wt-danger':'#f7768e','--wt-warning':'#e0af68',
+          },
+        },
+        light: {
+          swatches: ['#e1e2e7','#d5d6db','#2e7de9','#3760bf'],
+          vars: {
+            '--bg':'#e1e2e7','--surface':'#d5d6db','--surface2':'#c8c9ce',
+            '--border':'#c4c8da','--text':'#3760bf','--text2':'#848cb5',
+            '--accent':'#2e7de9','--accent-hover':'#4488ff',
+            '--danger':'#f52a65','--warning':'#8c6c3e','--success':'#587539',
+            '--badge-bg':'#c8c9ce','--badge-text':'#2e7de9',
+            '--high-bg':'rgba(245,42,101,0.12)','--high-text':'#f52a65',
+            '--card-selected':'rgba(46,125,233,0.12)','--card-selected-border':'#2e7de9',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06)',
+            '--wt-bg':'#e1e2e7','--wt-sidebar-bg':'#d5d6db','--wt-surface':'#cbccd1',
+            '--wt-surface2':'#c0c1c8','--wt-border':'#b8b9c4','--wt-text':'#3760bf',
+            '--wt-text-muted':'#848cb5','--wt-accent':'#2e7de9','--wt-accent2':'#9854f1',
+            '--wt-danger':'#f52a65','--wt-warning':'#8c6c3e',
+          },
+        },
+      },
+      nord: {
+        name: 'Nord',
+        dark: {
+          swatches: ['#2e3440','#3b4252','#88c0d0','#eceff4'],
+          vars: {
+            '--bg':'#2e3440','--surface':'#3b4252','--surface2':'#434c5e',
+            '--border':'#434c5e','--text':'#eceff4','--text2':'#616e88',
+            '--accent':'#88c0d0','--accent-hover':'#9ecfde',
+            '--danger':'#bf616a','--warning':'#ebcb8b','--success':'#a3be8c',
+            '--badge-bg':'#434c5e','--badge-text':'#88c0d0',
+            '--high-bg':'rgba(191,97,106,0.2)','--high-text':'#bf616a',
+            '--card-selected':'rgba(136,192,208,0.15)','--card-selected-border':'#88c0d0',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+            '--wt-bg':'#2e3440','--wt-sidebar-bg':'#272c36','--wt-surface':'#3b4252',
+            '--wt-surface2':'#434c5e','--wt-border':'#434c5e','--wt-text':'#eceff4',
+            '--wt-text-muted':'#616e88','--wt-accent':'#88c0d0','--wt-accent2':'#81a1c1',
+            '--wt-danger':'#bf616a','--wt-warning':'#ebcb8b',
+          },
+        },
+        light: {
+          swatches: ['#eceff4','#e5e9f0','#5e81ac','#2e3440'],
+          vars: {
+            '--bg':'#eceff4','--surface':'#e5e9f0','--surface2':'#d8dee9',
+            '--border':'#d0d6e2','--text':'#2e3440','--text2':'#4c566a',
+            '--accent':'#5e81ac','--accent-hover':'#7096c0',
+            '--danger':'#bf616a','--warning':'#d08770','--success':'#a3be8c',
+            '--badge-bg':'#d8dee9','--badge-text':'#5e81ac',
+            '--high-bg':'rgba(191,97,106,0.12)','--high-text':'#bf616a',
+            '--card-selected':'rgba(94,129,172,0.12)','--card-selected-border':'#5e81ac',
+            '--shadow':'0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06)',
+            '--wt-bg':'#eceff4','--wt-sidebar-bg':'#e5e9f0','--wt-surface':'#dde2ec',
+            '--wt-surface2':'#d0d6e2','--wt-border':'#c8d0df','--wt-text':'#2e3440',
+            '--wt-text-muted':'#4c566a','--wt-accent':'#5e81ac','--wt-accent2':'#81a1c1',
+            '--wt-danger':'#bf616a','--wt-warning':'#d08770',
+          },
+        },
+      },
+    };
+
+    let currentMode = localStorage.getItem('app-mode') || 'dark';
+    let currentThemeId = localStorage.getItem('app-theme') || 'mocha';
+
+    function setMode(mode) {
+      currentMode = mode;
+      localStorage.setItem('app-mode', mode);
+      applyTheme(currentThemeId);
+    }
+
+    function applyTheme(id) {
+      const theme = THEMES[id];
+      if (!theme) return;
+      currentThemeId = id;
+      const variant = theme[currentMode] || theme.dark;
+      const root = document.documentElement;
+      Object.entries(variant.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      localStorage.setItem('app-theme', id);
+      renderThemeGrid();
+      renderModePill();
+    }
+
+    function renderModePill() {
+      const light = document.getElementById('mode-light-btn');
+      const dark = document.getElementById('mode-dark-btn');
+      if (!light || !dark) return;
+      light.classList.toggle('active', currentMode === 'light');
+      dark.classList.toggle('active', currentMode === 'dark');
+    }
+
+    function renderThemeGrid() {
+      const grid = document.getElementById('themeGrid');
+      if (!grid) return;
+      grid.innerHTML = Object.entries(THEMES).map(([id, t]) => {
+        const variant = t[currentMode] || t.dark;
+        const isActive = id === currentThemeId;
+        return `
+          <div class="theme-card${isActive ? ' active' : ''}" onclick="applyTheme('${id}')">
+            <div class="theme-swatches">
+              ${variant.swatches.map(c => `<div class="theme-swatch" style="background:${c}"></div>`).join('')}
+            </div>
+            <div class="theme-name">${t.name}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Load saved theme on startup
+    applyTheme(currentThemeId);
   </script>
 </body>
 </html>

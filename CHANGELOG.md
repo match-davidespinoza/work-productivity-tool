@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0] - 2026-05-31
+
+### Added
+- Work Tracker tab: generate AI-written contribution summaries from GitHub PRs, local git commits, and Jira activity for any date range
+- Summaries are saved as Markdown files to `~/Documents/WorkTracker/summaries/` with YAML frontmatter and can be viewed, browsed, or deleted from within the app
+- GitHub auth flow via `gh auth login --web`, launched in a Terminal window with an IPC handler (`wt-gh-do-auth`, `wt-gh-auth-status`)
+- Tab bar navigation — app now supports multiple named tabs with a home/welcome screen
+- Home screen with quick-access tiles to each tab
+
+### Changed
+- Replaced dynamic light/dark system theme with a fixed Catppuccin Mocha color palette across the entire UI
+- Removed automated changelog generation from the release script — `scripts/release.js` now runs the electron-builder command directly without version prompting
+
 ## [1.0.0] - 2026-05-20
 
 ### Added
