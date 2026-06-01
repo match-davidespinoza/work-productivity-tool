@@ -244,6 +244,66 @@ end tell`;
   });
 });
 
+// ── GitHub PR scanner IPC ────────────────────────────────────────────────────
+
+let ghPrsCache = null;
+let ghPrsCacheTime = 0;
+const GH_PR_CACHE_TTL = 5 * 60 * 1000;
+
+ipcMain.handle('gh-open-prs', async (_e, { force } = {}) => {
+  if (!force && ghPrsCache && Date.now() - ghPrsCacheTime < GH_PR_CACHE_TTL) {
+    return { ok: true, prs: ghPrsCache, fetchedAt: ghPrsCacheTime };
+  }
+  try {
+    const listOut = await runShell(
+      'gh search prs --author @me --state open --json number,title,url,repository,updatedAt,isDraft --limit 50'
+    );
+    const raw = JSON.parse(listOut || '[]');
+    // Normalize: gh search prs uses `repository`, gh pr list uses `headRepository`
+    const prs = raw.map(pr => ({ ...pr, headRepository: pr.repository }));
+
+    const withDetails = await Promise.all(prs.map(async (pr) => {
+      try {
+        const repo = pr.headRepository?.nameWithOwner;
+        if (!repo) return { ...pr, comments: [], reviewThreads: [], reviews: [], reviewDecision: null };
+        const [viewOut, inlineOut] = await Promise.all([
+          runShell(`gh pr view ${pr.number} --repo "${repo}" --json comments,reviews,reviewDecision`),
+          runShell(`gh api "repos/${repo}/pulls/${pr.number}/comments" --paginate`),
+        ]);
+        const detail = JSON.parse(viewOut || '{}');
+        const inlineComments = JSON.parse(inlineOut || '[]');
+
+        // Group inline comments into threads: root comments + their replies
+        const roots = inlineComments.filter(c => !c.in_reply_to_id);
+        const replyMap = {};
+        inlineComments.filter(c => c.in_reply_to_id).forEach(r => {
+          if (!replyMap[r.in_reply_to_id]) replyMap[r.in_reply_to_id] = [];
+          replyMap[r.in_reply_to_id].push(r);
+        });
+        const reviewThreads = roots.map(root => ({
+          isResolved: false,
+          isOutdated: root.position === null,
+          path: root.path,
+          comments: [
+            { author: { login: root.user?.login }, body: root.body, createdAt: root.created_at, url: root.html_url },
+            ...(replyMap[root.id] || []).map(r => ({ author: { login: r.user?.login }, body: r.body, createdAt: r.created_at, url: r.html_url })),
+          ],
+        }));
+
+        return { ...pr, comments: detail.comments || [], reviewThreads, reviews: detail.reviews || [], reviewDecision: detail.reviewDecision ?? null };
+      } catch {
+        return { ...pr, comments: [], reviewThreads: [], reviews: [] };
+      }
+    }));
+
+    ghPrsCache = withDetails;
+    ghPrsCacheTime = Date.now();
+    return { ok: true, prs: withDetails, fetchedAt: ghPrsCacheTime };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
 // ── Work Tracker IPC ─────────────────────────────────────────────────────────
 
 ipcMain.handle('wt-generate', async (_e, { since, until, label, source }) => {

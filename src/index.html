@@ -625,10 +625,157 @@
       line-height: 1.5;
     }
 
-    .home-card.jira:hover { border-color: #89b4fa; }
-    .home-card.jira:hover .home-card-title { color: #89b4fa; }
-    .home-card.work-tracker:hover { border-color: var(--accent); }
-    .home-card.work-tracker:hover .home-card-title { color: var(--accent); }
+    .home-card:hover { border-color: var(--accent); }
+    .home-card:hover .home-card-title { color: var(--accent); }
+
+    .home-card-icon { display: flex; justify-content: center; }
+
+    /* ── GitHub PR tab ── */
+    #gh-auth-banner {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: none;
+      flex-shrink: 0;
+    }
+    #gh-auth-banner.visible { display: block; }
+    #gh-auth-banner h2 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    #gh-auth-banner p { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
+
+    #gh-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #gh-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #gh-controls-left { flex: 1; display: flex; align-items: center; }
+
+    .gh-fetch-time { font-size: 12px; color: var(--text2); }
+
+    #gh-refresh-btn {
+      height: 36px;
+      padding: 0 18px;
+      background: var(--accent);
+      color: #1e1e2e;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      -webkit-app-region: no-drag;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #gh-refresh-btn:hover { background: var(--accent-hover); }
+    #gh-refresh-btn:disabled { opacity: 0.5; cursor: default; }
+    #gh-refresh-icon { font-size: 25px; line-height: 1; position: relative; top: -2px; }
+
+    #gh-results { flex: 1; }
+
+    .gh-repo-group { margin-bottom: 20px; }
+    .gh-repo-name {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+
+    .badge.gh-approved { background: rgba(166,227,161,0.2); color: #a6e3a1; }
+    .badge.gh-changes { background: rgba(243,139,168,0.2); color: #f38ba8; }
+    .badge.gh-review-required { background: rgba(249,226,175,0.2); color: #f9e2af; }
+    .badge.gh-draft { background: var(--badge-bg); color: var(--text2); }
+    .badge.gh-threads { background: rgba(249,226,175,0.2); color: #f9e2af; }
+
+    .gh-update-time { font-size: 11px; color: var(--text2); margin-left: auto; }
+
+    .gh-activity {
+      margin-top: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gh-thread {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 8px 10px;
+      border-left: 2px solid var(--warning);
+    }
+
+    .gh-thread-path {
+      font-size: 10px;
+      font-family: 'SF Mono', 'Menlo', monospace;
+      color: var(--text2);
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+
+    .gh-thread-body, .gh-comment-body {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 3px;
+    }
+
+    .gh-thread-more { font-size: 10px; color: var(--accent); margin-top: 4px; }
+
+    .gh-comment-link {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+    .gh-comment-link:hover { text-decoration: underline; cursor: pointer; }
+
+    .gh-comment {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+
+    .gh-pr-card {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .gh-pr-card:hover { border-color: var(--accent); }
+
+    .gh-dropdown {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      margin-top: 8px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gh-dropdown.open { display: flex; }
+
+    .gh-chevron {
+      font-size: 10px;
+      color: var(--text2);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .gh-pr-card.expanded .gh-chevron { transform: rotate(180deg); }
 
     /* ── Settings ── */
     #tab-settings {
@@ -940,8 +1087,9 @@
 
   <div id="titlebar">
     <div id="tab-bar">
-      <button class="tab" onclick="switchTab('jira')">Jira Scanner</button>
       <button class="tab" onclick="switchTab('work-tracker')">Work Tracker</button>
+      <button class="tab" onclick="switchTab('github')">GitHub PRs</button>
+      <button class="tab" onclick="switchTab('jira')">Jira Scanner</button>
       <button id="home-btn" class="active" onclick="switchTab('home')" title="Home">⌂</button>
       <button id="settings-gear" onclick="switchTab('settings')" title="Settings">⚙</button>
     </div>
@@ -971,15 +1119,26 @@
         <p>Your personal engineering dashboard</p>
       </div>
       <div class="home-cards">
-        <div class="home-card jira" onclick="switchTab('jira')">
-          <div class="home-card-icon">🔍</div>
-          <div class="home-card-title">Jira Scanner</div>
-          <div class="home-card-desc">View recent comments, open tickets, high priority issues, and more</div>
-        </div>
         <div class="home-card work-tracker" onclick="switchTab('work-tracker')">
           <div class="home-card-icon">📊</div>
           <div class="home-card-title">Work Tracker</div>
           <div class="home-card-desc">Generate AI-powered summaries of your contributions across GitHub and Jira</div>
+        </div>
+        <div class="home-card github" onclick="switchTab('github')">
+          <div class="home-card-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </div>
+          <div class="home-card-title">GitHub PRs</div>
+          <div class="home-card-desc">Track your open pull requests, review threads, and comments across all repos</div>
+        </div>
+        <div class="home-card jira" onclick="switchTab('jira')">
+          <div class="home-card-icon">
+            <img src="../jira-icon.png" width="40" height="40" style="border-radius:8px" />
+          </div>
+          <div class="home-card-title">Jira Scanner</div>
+          <div class="home-card-desc">View recent comments, open tickets, high priority issues, and more</div>
         </div>
       </div>
     </div>
@@ -1115,6 +1274,28 @@
       </div>
     </div>
   </div><!-- #tab-work-tracker -->
+
+  <div id="tab-github" class="tab-panel">
+    <div id="gh-auth-banner">
+      <h2>Connect to GitHub</h2>
+      <p>Sign in with your GitHub account to view your open pull requests.</p>
+      <div class="setup-fields">
+        <button id="gh-do-auth-btn" onclick="ghDoAuth()" style="height:36px;padding:0 20px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag;display:flex;align-items:center;gap:8px">🔑 Sign in with GitHub</button>
+      </div>
+    </div>
+    <div id="gh-main">
+      <div id="gh-controls">
+        <div id="gh-controls-left">
+          <span class="gh-fetch-time" id="gh-fetch-time"></span>
+        </div>
+        <button id="gh-refresh-btn" onclick="loadGhPrs(true)">
+          <span id="gh-refresh-icon">⟳</span>
+          <span id="gh-refresh-label">Refresh</span>
+        </button>
+      </div>
+      <div id="gh-results"></div>
+    </div>
+  </div><!-- #tab-github -->
 
   <script>
     const { shell, ipcRenderer } = require('electron');
@@ -1683,7 +1864,7 @@
     // ── Tab switching ─────────────────────────────────────────────────────────
 
     function switchTab(name) {
-      const tabNames = ['jira', 'work-tracker'];
+      const tabNames = ['work-tracker', 'github', 'jira'];
       document.querySelectorAll('.tab').forEach((t, i) => {
         t.classList.toggle('active', tabNames[i] === name);
       });
@@ -1697,6 +1878,7 @@
       if (name === 'settings') renderThemeGrid();
       if (name === 'work-tracker') { wtLoadHistory(); wtCheckGhAuth(); wtCheckJiraAuth(); }
       if (name === 'jira' && acliAuthenticated && !jiraResultsLoaded) runReport();
+      if (name === 'github') { initGhAuth().then(ok => { if (ok && !ghPrsLoaded) loadGhPrs(); }); }
     }
 
     let jiraResultsLoaded = false;
@@ -1878,6 +2060,156 @@
       });
     }
 
+
+    // ── GitHub PR Scanner ─────────────────────────────────────────────────────
+
+    let ghPrsLoaded = false;
+    let ghRefreshing = false;
+
+    async function initGhAuth() {
+      const result = await ipcRenderer.invoke('wt-gh-auth-status');
+      const banner = document.getElementById('gh-auth-banner');
+      if (banner) banner.classList.toggle('visible', !result.ok);
+      return result.ok;
+    }
+
+    async function ghDoAuth() {
+      const btn = document.getElementById('gh-do-auth-btn');
+      btn.disabled = true;
+      btn.textContent = '⟳ Opening Terminal…';
+      const result = await ipcRenderer.invoke('wt-gh-do-auth');
+      btn.disabled = false;
+      btn.textContent = '🔑 Sign in with GitHub';
+      if (!result.pendingTerminal) return;
+      const pollTimer = setInterval(async () => {
+        const ok = await initGhAuth();
+        if (ok) { clearInterval(pollTimer); loadGhPrs(); }
+      }, 2000);
+      setTimeout(() => clearInterval(pollTimer), 180000);
+    }
+
+    async function loadGhPrs(force = false) {
+      if (ghRefreshing) return;
+      ghRefreshing = true;
+      const btn = document.getElementById('gh-refresh-btn');
+      const label = document.getElementById('gh-refresh-label');
+      if (btn) btn.disabled = true;
+      if (label) label.textContent = 'Refreshing…';
+      document.getElementById('gh-results').innerHTML =
+        '<div class="issue-list"><div class="state-loading"><div class="spinner"></div>Fetching open PRs…</div></div>';
+
+      try {
+        const result = await ipcRenderer.invoke('gh-open-prs', { force });
+        if (!result.ok) throw new Error(result.error || 'GitHub CLI error');
+        renderGhPrs(result.prs, result.fetchedAt);
+        ghPrsLoaded = true;
+      } catch (err) {
+        document.getElementById('gh-results').innerHTML =
+          `<div class="issue-list">${errorState(err.message)}</div>`;
+      } finally {
+        ghRefreshing = false;
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = 'Refresh';
+      }
+    }
+
+    function renderGhPrs(prs, fetchedAt) {
+      const ft = document.getElementById('gh-fetch-time');
+      if (ft && fetchedAt) ft.textContent = 'Updated ' + timeAgo(new Date(fetchedAt).toISOString());
+
+      const results = document.getElementById('gh-results');
+      if (!prs.length) {
+        results.innerHTML = `<div class="issue-list">${emptyState('No open pull requests')}</div>`;
+        return;
+      }
+
+      const byRepo = {};
+      prs.forEach(pr => {
+        const repo = pr.headRepository?.nameWithOwner || 'unknown';
+        if (!byRepo[repo]) byRepo[repo] = [];
+        byRepo[repo].push(pr);
+      });
+
+      results.innerHTML = Object.entries(byRepo).map(([repo, repoPrs]) => `
+        <div class="gh-repo-group">
+          <div class="gh-repo-name">${escHtml(repo.split('/').pop())}</div>
+          <div class="issue-list">${repoPrs.map(renderGhPr).join('')}</div>
+        </div>`).join('');
+    }
+
+    function toggleGhPr(card) {
+      const dropdown = card.querySelector('.gh-dropdown');
+      const isOpen = dropdown.classList.contains('open');
+      dropdown.classList.toggle('open', !isOpen);
+      card.classList.toggle('expanded', !isOpen);
+    }
+
+    function ghReviewBadge(pr) {
+      if (pr.isDraft) return '<span class="badge gh-draft">Draft</span>';
+      switch (pr.reviewDecision) {
+        case 'APPROVED': return '<span class="badge gh-approved">Approved</span>';
+        case 'CHANGES_REQUESTED': return '<span class="badge gh-changes">Changes requested</span>';
+        case 'REVIEW_REQUIRED': return '<span class="badge gh-review-required">Review required</span>';
+        default: return '';
+      }
+    }
+
+    function renderGhPr(pr) {
+      const unresolvedThreads = (pr.reviewThreads || []).filter(t => !t.isOutdated);
+      const recentComments = (pr.comments || []).slice(-3);
+
+      const threadsHtml = unresolvedThreads.slice(0, 3).map(thread => {
+        const c = thread.comments?.[0];
+        if (!c) return '';
+        const body = c.body || '';
+        const preview = escHtml(body.slice(0, 250)) + (body.length > 250 ? '…' : '');
+        const bodyHtml = c.url
+          ? `<a href="#" onclick="openExternal('${escHtml(c.url)}'); event.stopPropagation(); return false;" class="gh-comment-link">${preview}</a>`
+          : preview;
+        return `
+          <div class="gh-thread">
+            ${thread.path ? `<div class="gh-thread-path">${escHtml(thread.path)}</div>` : ''}
+            <div style="font-size:11px;color:var(--text2)">
+              <strong>${escHtml(c.author?.login || '?')}</strong> · ${timeAgo(c.createdAt)}
+            </div>
+            <div class="gh-thread-body">${bodyHtml}</div>
+            ${thread.comments.length > 1 ? `<div class="gh-thread-more">+${thread.comments.length - 1} more repl${thread.comments.length > 2 ? 'ies' : 'y'}</div>` : ''}
+          </div>`;
+      }).join('');
+
+      const commentsHtml = recentComments.map(c => {
+        const body = c.body || '';
+        const preview = escHtml(body.slice(0, 250)) + (body.length > 250 ? '…' : '');
+        const bodyHtml = c.url
+          ? `<a href="#" onclick="openExternal('${escHtml(c.url)}'); event.stopPropagation(); return false;" class="gh-comment-link">${preview}</a>`
+          : preview;
+        return `
+          <div class="gh-comment">
+            <div style="font-size:11px;color:var(--text2)">
+              <strong>${escHtml(c.author?.login || '?')}</strong> · ${timeAgo(c.createdAt)}
+            </div>
+            <div class="gh-comment-body">${bodyHtml}</div>
+          </div>`;
+      }).join('');
+
+      const noActivity = unresolvedThreads.length === 0 && recentComments.length === 0;
+      const dropdownContent = noActivity
+        ? '<div style="font-size:12px;color:var(--text2);text-align:center;padding:8px 0">No comments or threads</div>'
+        : `${threadsHtml}${commentsHtml}`;
+
+      return `
+        <div class="issue-item gh-pr-card" onclick="toggleGhPr(this)">
+          <div class="issue-meta">
+            ${ghReviewBadge(pr)}
+            ${unresolvedThreads.length > 0 ? `<span class="badge gh-threads">${unresolvedThreads.length} unresolved</span>` : ''}
+            <a href="#" onclick="openExternal('${escHtml(pr.url)}'); event.stopPropagation(); return false;" style="color:inherit;text-decoration:none;cursor:pointer;font-size:13px;font-weight:500;line-height:1.4"><span style="color:var(--accent);font-weight:600">#${pr.number}</span> ${escHtml(pr.title)}</a>
+            <span style="flex:1"></span>
+            <span class="gh-update-time" style="flex-shrink:0">${timeAgo(pr.updatedAt)}</span>
+            <span class="gh-chevron" style="padding:0 4px">▼</span>
+          </div>
+          <div class="gh-dropdown">${dropdownContent}</div>
+        </div>`;
+    }
 
     // ── Theme system ─────────────────────────────────────────────────────────
 

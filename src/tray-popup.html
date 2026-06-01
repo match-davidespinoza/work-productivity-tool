@@ -13,6 +13,7 @@
       --accent: #0071e3;
       --success: #34c759;
       --danger: #ff3b30;
+      --warning: #ff9500;
       --radius: 8px;
     }
 
@@ -24,6 +25,7 @@
         --text: #f5f5f7;
         --text2: #98989d;
         --accent: #0a84ff;
+        --warning: #ff9f0a;
       }
     }
 
@@ -45,23 +47,42 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px 10px;
-      border-bottom: 1px solid var(--border);
+      padding: 10px 12px 0;
       flex-shrink: 0;
       -webkit-app-region: drag;
+      border-bottom: 1px solid var(--border);
     }
 
-    #header-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
+    #header-tabs {
+      display: flex;
+      gap: 2px;
+      -webkit-app-region: no-drag;
     }
+
+    .htab {
+      height: 28px;
+      padding: 0 12px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: color 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .htab:hover { color: var(--text); }
+    .htab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
     #header-right {
       display: flex;
       align-items: center;
       gap: 8px;
       -webkit-app-region: no-drag;
+      padding-bottom: 8px;
     }
 
     #time-select {
@@ -90,16 +111,20 @@
 
     #open-app-btn:hover { opacity: 0.85; }
 
-    #scroll-area {
+    .scroll-area {
       flex: 1;
       overflow-y: auto;
       padding: 10px;
+      display: none;
     }
+
+    .scroll-area.active { display: block; }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+    /* ── Jira styles ── */
     .comment-block {
       margin-bottom: 10px;
       border: 1px solid var(--border);
@@ -142,7 +167,6 @@
     }
 
     .comment-entry:last-child { border-bottom: none; }
-
     .comment-entry.seen { opacity: 0.45; }
 
     .comment-meta {
@@ -180,17 +204,140 @@
       line-height: 1;
     }
 
-    .seen-btn:hover {
-      border-color: var(--accent);
+    .seen-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .comment-entry.seen .seen-btn { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* ── GitHub PR styles ── */
+    .pr-block {
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .pr-row {
+      padding: 8px 10px 6px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pr-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .pr-number {
+      font-size: 11px;
+      font-weight: 600;
       color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      flex-shrink: 0;
     }
 
-    .comment-entry.seen .seen-btn {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
+    .pr-number:hover { text-decoration: underline; }
+
+    .pr-badge {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
+    .pr-badge.approved { background: rgba(52,199,89,0.2); color: #34c759; }
+    .pr-badge.changes { background: rgba(255,59,48,0.2); color: #ff3b30; }
+    .pr-badge.review-required { background: rgba(255,149,0,0.2); color: var(--warning); }
+    .pr-badge.draft { background: rgba(110,110,115,0.2); color: var(--text2); }
+    .pr-badge.threads { background: rgba(255,149,0,0.15); color: var(--warning); }
+
+    .pr-update-time {
+      font-size: 10px;
+      color: var(--text2);
+      margin-left: auto;
+    }
+
+    .pr-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pr-activity {
+      padding: 6px 10px;
+    }
+
+    .pr-thread {
+      padding: 6px 8px;
+      border-radius: 5px;
+      background: var(--bg);
+      border-left: 2px solid var(--warning);
+      margin-bottom: 5px;
+    }
+
+    .pr-thread:last-child { margin-bottom: 0; }
+
+    .pr-thread-path {
+      font-size: 9px;
+      font-family: 'SF Mono', 'Menlo', monospace;
+      color: var(--text2);
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+
+    .pr-thread-meta { font-size: 10px; color: var(--text2); }
+
+    .pr-thread-body {
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text);
+      margin-top: 2px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .pr-comment {
+      padding: 5px 8px;
+      border-radius: 5px;
+      background: var(--bg);
+      margin-bottom: 5px;
+    }
+
+    .pr-comment:last-child { margin-bottom: 0; }
+
+    .pr-block { cursor: pointer; }
+    .pr-block:hover .pr-row { background: color-mix(in srgb, var(--surface) 80%, var(--accent) 20%); }
+
+    .pr-dropdown { display: none; }
+    .pr-dropdown.open { display: block; }
+
+    .pr-chevron {
+      font-size: 9px;
+      color: var(--text2);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .pr-block.expanded .pr-chevron { transform: rotate(180deg); }
+
+    .pr-repo-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text2);
+      padding: 8px 10px 4px;
+    }
+
+    /* ── Shared states ── */
     .state {
       text-align: center;
       padding: 40px 20px;
@@ -209,14 +356,16 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .error { color: var(--danger); }
+    .error { color: #ff3b30; }
   </style>
 </head>
 <body>
 
   <div id="header">
-    <span id="header-title">Recent Comments</span>
+    <div id="header-tabs">
+      <button class="htab active" id="htab-jira" onclick="switchPopupTab('jira')">Jira</button>
+      <button class="htab" id="htab-github" onclick="switchPopupTab('github')">GitHub PRs</button>
+    </div>
     <div id="header-right">
       <select id="time-select">
         <option value="6">6 h</option>
@@ -228,12 +377,34 @@
     </div>
   </div>
 
-  <div id="scroll-area">
+  <div id="jira-area" class="scroll-area active">
+    <div class="state"><div class="spinner"></div>Loading…</div>
+  </div>
+
+  <div id="github-area" class="scroll-area">
     <div class="state"><div class="spinner"></div>Loading…</div>
   </div>
 
   <script>
     const { ipcRenderer, shell } = require('electron');
+
+    // ── Tab switching ─────────────────────────────────────────────────────────
+
+    let activeTab = 'jira';
+    let ghPrsLoaded = false;
+
+    function switchPopupTab(tab) {
+      activeTab = tab;
+      document.getElementById('htab-jira').classList.toggle('active', tab === 'jira');
+      document.getElementById('htab-github').classList.toggle('active', tab === 'github');
+      document.getElementById('jira-area').classList.toggle('active', tab === 'jira');
+      document.getElementById('github-area').classList.toggle('active', tab === 'github');
+      document.getElementById('time-select').style.display = tab === 'jira' ? '' : 'none';
+
+      if (tab === 'github' && !ghPrsLoaded) loadGhPrs();
+    }
+
+    // ── Shared helpers ────────────────────────────────────────────────────────
 
     const SEEN_KEY = 'seen_comment_ids';
     function getSeenIds() { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
@@ -243,13 +414,8 @@
       const seen = getSeenIds();
       const entry = el.closest('.comment-entry');
       const nowSeen = !seen.has(commentId);
-      if (nowSeen) {
-        seen.add(commentId);
-        entry.classList.add('seen');
-      } else {
-        seen.delete(commentId);
-        entry.classList.remove('seen');
-      }
+      if (nowSeen) { seen.add(commentId); entry.classList.add('seen'); }
+      else { seen.delete(commentId); entry.classList.remove('seen'); }
       saveSeenIds(seen);
       ipcRenderer.send('seen-updated', commentId, nowSeen);
     }
@@ -282,9 +448,10 @@
       return parts.join('');
     }
 
+    // ── Jira ──────────────────────────────────────────────────────────────────
+
     async function fetchComments(hours) {
       const cutoff = new Date(Date.now() - hours * 3600000);
-
       const searchResult = await ipcRenderer.invoke('acli-search', {
         jql: 'assignee = currentUser() OR watcher = currentUser() OR reporter = currentUser() ORDER BY updated DESC',
         fields: 'summary,parent',
@@ -294,7 +461,6 @@
       const issues = JSON.parse(searchResult.body);
 
       const results = [];
-
       await Promise.all(issues.map(async issue => {
         try {
           const viewResult = await ipcRenderer.invoke('acli-view', { key: issue.key, fields: 'summary,comment' });
@@ -305,20 +471,16 @@
         } catch (_) {}
       }));
 
-      results.sort((a, b) =>
-        new Date(b.comments[0].created) - new Date(a.comments[0].created)
-      );
-
+      results.sort((a, b) => new Date(b.comments[0].created) - new Date(a.comments[0].created));
       return results;
     }
 
-    function render(data) {
-      const area = document.getElementById('scroll-area');
+    function renderJira(data) {
+      const area = document.getElementById('jira-area');
       if (!data.length) {
         area.innerHTML = '<div class="state">No recent comments</div>';
         return;
       }
-
       const seenIds = getSeenIds();
       area.innerHTML = data.slice(0, 15).map(({ issue, comments }) => {
         const commentsHtml = comments.slice(0, 3).map(c => {
@@ -331,7 +493,6 @@
               <div class="comment-text">${esc(text.slice(0, 200))}${text.length > 200 ? '…' : ''}</div>
             </div>`;
         }).join('');
-
         const browseUrl = `${jiraSiteUrl}/browse/${issue.key}`;
         return `
           <div class="comment-block">
@@ -346,28 +507,136 @@
 
     let jiraSiteUrl = 'https://e2p.atlassian.net';
 
-    async function load() {
+    async function loadJira() {
       const config = await ipcRenderer.invoke('acli-get-config');
       if (config.ok) jiraSiteUrl = 'https://' + config.site;
 
       const hours = parseInt(document.getElementById('time-select').value, 10);
-      document.getElementById('scroll-area').innerHTML =
+      document.getElementById('jira-area').innerHTML =
         '<div class="state"><div class="spinner"></div>Loading…</div>';
       try {
         const data = await fetchComments(hours);
-        render(data);
+        renderJira(data);
       } catch (err) {
-        document.getElementById('scroll-area').innerHTML =
+        document.getElementById('jira-area').innerHTML =
           `<div class="state error">⚠ ${esc(err.message)}</div>`;
       }
     }
+
+    // ── GitHub PRs ────────────────────────────────────────────────────────────
+
+    function togglePrBlock(card) {
+      const dropdown = card.querySelector('.pr-dropdown');
+      const isOpen = dropdown.classList.contains('open');
+      dropdown.classList.toggle('open', !isOpen);
+      card.classList.toggle('expanded', !isOpen);
+    }
+
+    function prReviewBadge(pr) {
+      if (pr.isDraft) return '<span class="pr-badge draft">Draft</span>';
+      switch (pr.reviewDecision) {
+        case 'APPROVED': return '<span class="pr-badge approved">Approved</span>';
+        case 'CHANGES_REQUESTED': return '<span class="pr-badge changes">Changes</span>';
+        case 'REVIEW_REQUIRED': return '<span class="pr-badge review-required">Review needed</span>';
+        default: return '';
+      }
+    }
+
+    function renderGhPrs(prs) {
+      const area = document.getElementById('github-area');
+      if (!prs.length) {
+        area.innerHTML = '<div class="state">No open pull requests</div>';
+        return;
+      }
+
+      const byRepo = {};
+      prs.forEach(pr => {
+        const repo = pr.headRepository?.nameWithOwner || 'unknown';
+        if (!byRepo[repo]) byRepo[repo] = [];
+        byRepo[repo].push(pr);
+      });
+
+      area.innerHTML = Object.entries(byRepo).map(([repo, repoPrs]) => {
+        const prsHtml = repoPrs.map(pr => {
+          const unresolvedThreads = (pr.reviewThreads || []).filter(t => !t.isOutdated);
+          const recentComments = (pr.comments || []).slice(-2);
+
+          const threadsHtml = unresolvedThreads.slice(0, 2).map(thread => {
+            const c = thread.comments?.[0];
+            if (!c) return '';
+            const body = c.body || '';
+            const preview = esc(body.slice(0, 150)) + (body.length > 150 ? '…' : '');
+            const bodyHtml = c.url
+              ? `<a href="#" onclick="shell.openExternal('${esc(c.url)}'); event.stopPropagation(); return false;" style="color:inherit;text-decoration:none;display:block" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${preview}</a>`
+              : preview;
+            return `
+              <div class="pr-thread">
+                ${thread.path ? `<div class="pr-thread-path">${esc(thread.path)}</div>` : ''}
+                <div class="pr-thread-meta"><strong>${esc(c.author?.login || '?')}</strong> · ${timeAgo(c.createdAt)}</div>
+                <div class="pr-thread-body">${bodyHtml}</div>
+              </div>`;
+          }).join('');
+
+          const commentsHtml = recentComments.map(c => {
+            const body = c.body || '';
+            const preview = esc(body.slice(0, 150)) + (body.length > 150 ? '…' : '');
+            const bodyHtml = c.url
+              ? `<a href="#" onclick="shell.openExternal('${esc(c.url)}'); event.stopPropagation(); return false;" style="color:inherit;text-decoration:none;display:block" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${preview}</a>`
+              : preview;
+            return `
+              <div class="pr-comment">
+                <div class="pr-thread-meta"><strong>${esc(c.author?.login || '?')}</strong> · ${timeAgo(c.createdAt)}</div>
+                <div class="pr-thread-body">${bodyHtml}</div>
+              </div>`;
+          }).join('');
+
+          const noActivity = unresolvedThreads.length === 0 && recentComments.length === 0;
+          const dropdownContent = noActivity
+            ? '<div style="font-size:11px;color:var(--text2);text-align:center;padding:6px 0">No comments or threads</div>'
+            : `${threadsHtml}${commentsHtml}`;
+
+          return `
+            <div class="pr-block" onclick="togglePrBlock(this)">
+              <div class="pr-row">
+                <div class="pr-meta">
+                  ${prReviewBadge(pr)}
+                  ${unresolvedThreads.length > 0 ? `<span class="pr-badge threads">${unresolvedThreads.length} thread${unresolvedThreads.length !== 1 ? 's' : ''}</span>` : ''}
+                  <a href="#" onclick="shell.openExternal('${esc(pr.url)}'); event.stopPropagation(); return false;" style="color:inherit;text-decoration:none;font-size:11px;font-weight:500;line-height:1.4"><strong style="color:var(--accent)">#${pr.number}</strong> ${esc(pr.title)}</a>
+                  <span style="flex:1"></span>
+                  <span class="pr-update-time" style="flex-shrink:0">${timeAgo(pr.updatedAt)}</span>
+                  <span class="pr-chevron" style="padding:0 4px">▼</span>
+                </div>
+              </div>
+              <div class="pr-dropdown"><div class="pr-activity">${dropdownContent}</div></div>
+            </div>`;
+        }).join('');
+
+        return `<div class="pr-repo-label">${esc(repo.split('/').pop())}</div>${prsHtml}`;
+      }).join('');
+    }
+
+    async function loadGhPrs() {
+      document.getElementById('github-area').innerHTML =
+        '<div class="state"><div class="spinner"></div>Loading…</div>';
+      try {
+        const result = await ipcRenderer.invoke('gh-open-prs');
+        if (!result.ok) throw new Error(result.error || 'GitHub CLI error');
+        renderGhPrs(result.prs);
+        ghPrsLoaded = true;
+      } catch (err) {
+        document.getElementById('github-area').innerHTML =
+          `<div class="state error">⚠ ${esc(err.message)}</div>`;
+      }
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
 
     function openApp() {
       ipcRenderer.invoke('open-main-window');
     }
 
-    document.getElementById('time-select').addEventListener('change', load);
-    ipcRenderer.on('fetch-comments', load);
+    document.getElementById('time-select').addEventListener('change', loadJira);
+    ipcRenderer.on('fetch-comments', loadJira);
   </script>
 </body>
 </html>

@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.1.0] - 2026-05-31
+
+### Added
+- GitHub PRs tab: view all open pull requests across repos, grouped by repository
+- Inline review threads and general PR comments fetched via the GitHub API, displayed in an expandable dropdown per PR
+- Clicking a comment preview opens that specific comment in the browser
+- GitHub PRs tab added to the tray popup alongside the existing Jira tab
+- Jira and GitHub PR icons on the home screen cards
+- GitHub PR card added to the home screen
+
+### Changed
+- Home screen card order and tab bar order updated to: Work Tracker, GitHub PRs, Jira Scanner
+- All home card hover colors now follow the active theme accent color
+- PR display shows `#number Title` inline with review status badge and timestamp
+- Clicking anywhere on a PR card (except the title link) expands/collapses its thread dropdown
+
 ## [2.0.0] - 2026-05-31
 
 ### Added
