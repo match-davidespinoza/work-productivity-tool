@@ -454,7 +454,7 @@
       const cutoff = new Date(Date.now() - hours * 3600000);
       const searchResult = await ipcRenderer.invoke('acli-search', {
         jql: 'assignee = currentUser() OR watcher = currentUser() OR reporter = currentUser() ORDER BY updated DESC',
-        fields: 'summary,parent',
+        fields: 'summary',
         limit: 100,
       });
       if (!searchResult.ok) throw new Error(searchResult.error || 'acli error');

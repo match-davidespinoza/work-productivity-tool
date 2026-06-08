@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1] - 2026-06-08
+
+### Added
+- Standup Summary button in the Work Tracker sidebar — generates a short, spoken-prose update covering the past 7 days (completed, in progress, blockers, next up), designed to be read aloud at a weekly standup in under 45 seconds
+- Result appears in a focused modal overlay with a copy button; not saved to summary history
+
 ## [2.1.0] - 2026-05-31
 
 ### Added

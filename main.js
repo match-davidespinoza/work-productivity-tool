@@ -321,6 +321,47 @@ ipcMain.handle('wt-generate', async (_e, { since, until, label, source }) => {
   return { summary, filename };
 });
 
+ipcMain.handle('wt-standup', async (_e, { since, until, source }) => {
+  const useGitHub = source !== 'jira';
+  const useJira   = source !== 'github';
+  const [prs, commits, jira] = await Promise.all([
+    useGitHub ? gatherGitHub(since, until)  : Promise.resolve(null),
+    useGitHub ? gatherCommits(since, until) : Promise.resolve(null),
+    useJira   ? gatherJira(since, until)    : Promise.resolve(null),
+  ]);
+  const isEmpty = (v) => !v || v === '[]' || v === 'No commits found.' || v === 'No Jira activity found.';
+  if ([prs, commits, jira].every(isEmpty)) return { standup: null };
+
+  const untilDisplay = until === 'present' ? 'today' : until;
+  const sections = [];
+  if (prs !== null)     sections.push(`=== GITHUB PULL REQUESTS ===\n${prs}`);
+  if (commits !== null) sections.push(`=== GIT COMMITS ===\n${commits}`);
+  if (jira !== null)    sections.push(`=== JIRA ACTIVITY ===\n${jira}`);
+
+  const prompt = `You are preparing a brief standup update for an engineer to read aloud at a weekly team meeting. Based on the last 7 days of work below, write a short spoken standup summary covering:
+
+1. What was completed
+2. What is currently in progress
+3. Any blockers
+4. What's next
+
+${sections.join('\n\n')}
+
+Rules:
+- Write in first-person, present tense, as if the engineer is speaking ("I finished...", "I'm currently working on...", "Next up is...")
+- Keep it SHORT — max 5-6 sentences total, readable in under 45 seconds
+- No markdown, no headers, no bullets — plain flowing prose only
+- Be specific but concise; skip filler phrases like "I was able to" or "I went ahead and"
+- If there are no clear blockers, skip that part entirely
+- Infer "in progress" from tickets/PRs that are open or recently updated but not merged/closed
+- Infer "completed" from merged PRs, closed tickets, or recent final commits`;
+
+  const escaped = prompt.replace(/'/g, "'\\''");
+  const out = await runShell(`cd ~ && claude -p --tools '' --output-format text '${escaped}'`);
+  if (!out) throw new Error('claude CLI returned no output');
+  return { standup: out };
+});
+
 ipcMain.handle('wt-list-summaries', () => {
   if (!fs.existsSync(SUMMARIES_DIR)) return [];
   return fs.readdirSync(SUMMARIES_DIR)

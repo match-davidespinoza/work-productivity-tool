@@ -1,6 +1,6 @@
 {
   "name": "jira-scanner",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "That Time My Homie Got Reincarnated as a Work Productivity Tool",
   "main": "main.js",
   "scripts": {
@@ -25,7 +25,7 @@
     }
   },
   "devDependencies": {
-    "electron": "^30",
+    "electron": "^30.5.1",
     "electron-builder": "^24"
   },
   "dependencies": {
