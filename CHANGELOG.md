@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.0.0] - 2026-06-09
+
+### Added
+- **PR Reviewer tab**: paste any GitHub PR URL to generate an AI-powered code review; includes existing reviewer comments, inline threads, and PR conversation in the prompt context
+- **Post to PR** button: post the generated review directly to the GitHub PR as yourself, without leaving the app
+- **GitHub PR notifications**: background polling every 60 seconds detects new comments, review threads, and review decision changes; fires a system notification on new activity
+- **Re-auth buttons**: Jira Scanner and GitHub PRs tabs now show a Re-auth button when authentication has expired or is missing; hidden when auth is valid
+
+### Changed
+- Tab and home card order updated to: Work Tracker, Jira Scanner, GitHub PRs, PR Reviewer
+- Notification toggles (Open at login, Jira notifications, GitHub PR notifications) moved from tab control bars into the Settings view
+- Default window width increased from 900px to 1100px to prevent home screen cards from being cut off
+- Generate Summary and Standup Summary buttons in Work Tracker sidebar set to equal height and font size
+- Work Tracker data source filter order updated to: Jira & GitHub, Jira only, GitHub only
+- Jira Scanner settings gear button replaced with a labeled Re-auth button
+- Copy buttons in Work Tracker and PR Reviewer no longer show the clipboard icon
+
 ## [2.1.1] - 2026-06-08
 
 ### Added

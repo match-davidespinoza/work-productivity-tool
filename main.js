@@ -17,6 +17,15 @@ function runShell(command) {
   });
 }
 
+function runShellWithStderr(command) {
+  return new Promise((resolve) => {
+    const env = { ...process.env, PATH: process.env.PATH + ':' + BIN_PATH };
+    exec(command, { env, maxBuffer: 10 * 1024 * 1024 }, (_err, stdout, stderr) => {
+      resolve({ stdout: stdout ? stdout.trim() : '', stderr: stderr ? stderr.trim() : '' });
+    });
+  });
+}
+
 function todayEnd() {
   // End of today as an ISO string — ensures "until present" includes the full current day
   const d = new Date();
@@ -129,7 +138,7 @@ function runAcli(args) {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 900,
+    width: 1100,
     height: 750,
     minWidth: 700,
     minHeight: 550,
@@ -172,8 +181,13 @@ ipcMain.handle('acli-do-auth', () => {
   return new Promise((resolve) => {
     // Write AppleScript to a temp file to avoid shell-escaping nightmares.
     // acli needs an interactive TTY for site selection after browser OAuth.
-    const scriptContent = `tell application "Terminal"
-  do script "acli jira auth login --web; sleep 1; osascript -e 'tell application \\"Terminal\\" to close front window'; exit"
+    const scriptContent = `set wasRunning to application "Terminal" is running
+tell application "Terminal"
+  if wasRunning then
+    do script "acli jira auth login --web; sleep 1; osascript -e 'tell application \\"Terminal\\"' -e 'close front window' -e 'if (count of windows) = 0 then quit' -e 'end tell'; exit"
+  else
+    do script "acli jira auth login --web; sleep 1; osascript -e 'quit app \\"Terminal\\"'; exit" in front window
+  end if
   activate
 end tell`;
     const tmpScript = path.join(os.tmpdir(), 'jira-scanner-auth.scpt');
@@ -230,8 +244,13 @@ ipcMain.handle('wt-gh-auth-status', async () => {
 
 ipcMain.handle('wt-gh-do-auth', () => {
   return new Promise((resolve) => {
-    const scriptContent = `tell application "Terminal"
-  do script "gh auth login --web; sleep 1; osascript -e 'tell application \\"Terminal\\" to close front window'; exit"
+    const scriptContent = `set wasRunning to application "Terminal" is running
+tell application "Terminal"
+  if wasRunning then
+    do script "gh auth login --web; sleep 1; osascript -e 'tell application \\"Terminal\\"' -e 'close front window' -e 'if (count of windows) = 0 then quit' -e 'end tell'; exit"
+  else
+    do script "gh auth login --web; sleep 1; osascript -e 'quit app \\"Terminal\\"'; exit" in front window
+  end if
   activate
 end tell`;
     const tmpScript = path.join(os.tmpdir(), 'jira-scanner-gh-auth.scpt');
@@ -361,6 +380,120 @@ Rules:
   return { standup: out };
 });
 
+// ── PR Review IPC ─────────────────────────────────────────────────────────────
+
+ipcMain.handle('pr-generate-review', async (_e, { url }) => {
+  const match = url.match(/github\.com\/([^/]+\/[^/]+)\/pull\/(\d+)/);
+  if (!match) return { ok: false, error: 'Invalid GitHub PR URL. Expected: https://github.com/owner/repo/pull/123' };
+  const [, repo, number] = match;
+
+  const [viewResult, inlineOut, diffOut] = await Promise.all([
+    runShellWithStderr(`gh pr view ${number} --repo "${repo}" --json title,body,additions,deletions,changedFiles,author,baseRefName,headRefName,reviews,comments`),
+    runShell(`gh api "repos/${repo}/pulls/${number}/comments" --paginate`),
+    runShell(`gh pr diff ${number} --repo "${repo}"`),
+  ]);
+
+  if (!viewResult.stdout) {
+    const detail = viewResult.stderr ? `: ${viewResult.stderr.trim()}` : '';
+    return { ok: false, error: `Could not fetch PR${detail}` };
+  }
+  const viewOut = viewResult.stdout;
+
+  let pr;
+  try { pr = JSON.parse(viewOut); } catch { return { ok: false, error: 'Failed to parse PR data from GitHub CLI.' }; }
+
+  const diff = diffOut || '(no diff available)';
+  const truncatedDiff = diff.length > 60000 ? diff.slice(0, 60000) + '\n\n(diff truncated — too large to show in full)' : diff;
+
+  // Build reviewer activity section
+  const reviewerSections = [];
+
+  const reviews = (pr.reviews || []).filter(r => r.body && r.body.trim());
+  if (reviews.length) {
+    reviewerSections.push('=== REVIEW SUMMARIES ===');
+    reviews.forEach(r => {
+      reviewerSections.push(`[${r.author?.login || 'reviewer'} — ${r.state}] ${r.body.trim()}`);
+    });
+  }
+
+  let inlineComments = [];
+  try { inlineComments = JSON.parse(inlineOut || '[]'); } catch {}
+  if (inlineComments.length) {
+    reviewerSections.push('=== INLINE REVIEW COMMENTS ===');
+    inlineComments.forEach(c => {
+      const path = c.path || '';
+      const line = c.line || c.original_line || '';
+      reviewerSections.push(`[${c.user?.login || 'reviewer'} on ${path}${line ? ':' + line : ''}] ${c.body.trim()}`);
+    });
+  }
+
+  const prComments = (pr.comments || []).filter(c => c.body && c.body.trim());
+  if (prComments.length) {
+    reviewerSections.push('=== PR CONVERSATION COMMENTS ===');
+    prComments.forEach(c => {
+      reviewerSections.push(`[${c.author?.login || 'commenter'}] ${c.body.trim()}`);
+    });
+  }
+
+  const reviewerContext = reviewerSections.length
+    ? '\n\n' + reviewerSections.join('\n')
+    : '';
+
+  const prompt = `You are a senior software engineer performing a thorough, constructive code review of a GitHub pull request.
+
+PR Title: ${pr.title}
+PR Description: ${pr.body || '(no description provided)'}
+Author: ${pr.author?.login || 'unknown'}
+Branch: ${pr.headRefName} → ${pr.baseRefName}
+Changes: +${pr.additions} additions / -${pr.deletions} deletions across ${pr.changedFiles} file(s)
+
+--- DIFF ---
+${truncatedDiff}
+--- END DIFF ---${reviewerContext}
+
+Write a clear, actionable code review using exactly these sections:
+
+## Summary
+1–2 sentences on what this PR does and its overall quality.
+
+## What's Good
+Bullet points highlighting positive aspects worth acknowledging.
+
+## Issues & Suggestions
+For each issue: state the problem, why it matters, and a concrete fix. Reference file paths and line numbers where possible. Separate minor nits from significant concerns.
+
+## Questions
+Any clarifying questions for the author about intent, approach, or edge cases.
+
+Rules:
+- Be direct and specific. No generic praise or filler.
+- If a section has nothing to say, omit it.
+- Do not repeat the diff back verbatim.
+- If other reviewers have already raised an issue, you may acknowledge it but avoid pure repetition — add new perspective or validate their concern instead.`;
+
+  const escaped = prompt.replace(/'/g, "'\\''");
+  const review = await runShell(`cd ~ && claude -p --tools '' --output-format text '${escaped}'`);
+  if (!review) return { ok: false, error: 'Claude returned no output. Is the `claude` CLI installed and working?' };
+  return { ok: true, review, prTitle: pr.title, prUrl: url };
+});
+
+ipcMain.handle('pr-post-review', (_e, { url, body }) => {
+  const match = url.match(/github\.com\/([^/]+\/[^/]+)\/pull\/(\d+)/);
+  if (!match) return { ok: false, error: 'Invalid PR URL' };
+  const [, repo, number] = match;
+  return new Promise((resolve) => {
+    const env = { ...process.env, PATH: process.env.PATH + ':' + BIN_PATH };
+    exec(
+      `gh pr review ${number} --repo "${repo}" --comment --body ${JSON.stringify(body)}`,
+      { env },
+      (err, _stdout, stderr) => {
+        if (err) resolve({ ok: false, error: stderr.trim() || err.message });
+        else resolve({ ok: true });
+      }
+    );
+  });
+});
+
 ipcMain.handle('wt-list-summaries', () => {
   if (!fs.existsSync(SUMMARIES_DIR)) return [];
   return fs.readdirSync(SUMMARIES_DIR)
@@ -382,8 +515,8 @@ ipcMain.handle('wt-read-summary', (_e, filename) => {
 });
 
 function hideTrayPopup() {
-  trayWindow.hide();
-  backdropWindow.hide();
+  if (trayWindow && !trayWindow.isDestroyed()) trayWindow.hide();
+  if (backdropWindow && !backdropWindow.isDestroyed()) backdropWindow.hide();
 }
 
 function createTrayWindow() {
@@ -430,10 +563,9 @@ function getTrayIcon() {
 }
 
 function createTray() {
+  if (tray && !tray.isDestroyed()) return;
   tray = new Tray(getTrayIcon());
   tray.setToolTip('Jira Scanner');
-
-  nativeTheme.on('updated', () => tray.setImage(getTrayIcon()));
 
   tray.on('click', (_event, bounds) => {
     if (trayWindow.isVisible()) {
@@ -492,13 +624,22 @@ ipcMain.handle('open-main-window', () => {
 
 app.on('will-resign-active', () => {
   if (Date.now() - trayPopupShownAt < 500) return;
-  if (trayWindow && trayWindow.isVisible()) hideTrayPopup();
+  if (trayWindow && !trayWindow.isDestroyed() && trayWindow.isVisible()) hideTrayPopup();
 });
 
 app.whenReady().then(() => {
   createWindow();
   createTrayWindow();
   createTray();
+
+  nativeTheme.on('updated', () => {
+    if (tray && !tray.isDestroyed()) {
+      tray.setImage(getTrayIcon());
+    } else {
+      tray = null;
+      createTray();
+    }
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().filter(w => w !== trayWindow && w !== backdropWindow).length === 0) createWindow();

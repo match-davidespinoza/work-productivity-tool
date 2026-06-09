@@ -102,6 +102,25 @@
       text-decoration: none;
     }
 
+    .auth-warning-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: color-mix(in srgb, #f59e0b 12%, var(--surface));
+      border-bottom: 1px solid color-mix(in srgb, #f59e0b 30%, var(--border));
+      font-size: 12px;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+    .auth-warning-banner.visible { display: flex; }
+    .auth-warning-banner .auth-warn-icon { font-size: 14px; flex-shrink: 0; }
+    .auth-warning-banner a {
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     .setup-fields {
       display: flex;
       gap: 10px;
@@ -218,23 +237,6 @@
     #run-btn:disabled { opacity: 0.5; cursor: default; }
     #run-btn-icon { font-size: 25px; line-height: 1; position: relative; top: -2px; }
 
-    #settings-btn {
-      height: 32px;
-      width: 32px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: background 0.15s;
-      -webkit-app-region: no-drag;
-    }
-
-    #settings-btn:hover { background: var(--surface2); }
 
     /* Login item toggle */
     .login-toggle {
@@ -631,16 +633,8 @@
     .home-card-icon { display: flex; justify-content: center; }
 
     /* ── GitHub PR tab ── */
-    #gh-auth-banner {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      display: none;
-      flex-shrink: 0;
-    }
+    #gh-auth-banner { display: none; }
     #gh-auth-banner.visible { display: block; }
-    #gh-auth-banner h2 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    #gh-auth-banner p { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
 
     #gh-main {
       flex: 1;
@@ -971,11 +965,12 @@
 
     .wt-generate-btn {
       width: 100%;
+      height: 32px;
       background: var(--wt-accent);
       color: #1e1e2e;
-      border: none;
+      border: 1px solid transparent;
       border-radius: var(--wt-radius);
-      padding: 7px;
+      padding: 0;
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
@@ -986,13 +981,14 @@
 
     .wt-standup-btn {
       width: 100%;
+      height: 32px;
       background: transparent;
       color: var(--wt-accent);
       border: 1px solid var(--wt-accent);
       border-radius: var(--wt-radius);
-      padding: 6px;
+      padding: 0;
       font-weight: 600;
-      font-size: 12px;
+      font-size: 13px;
       cursor: pointer;
       margin-top: 6px;
       transition: background 0.15s, opacity 0.15s;
@@ -1088,6 +1084,60 @@
     }
     .wt-status-bar.hidden { display: none; }
 
+    /* ── PR Review tab ── */
+    #tab-pr-review {
+      flex-direction: column;
+      background: var(--wt-bg);
+      color: var(--wt-text);
+    }
+
+    .pr-review-top {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--wt-border);
+      background: var(--wt-surface);
+      flex-shrink: 0;
+    }
+
+    .pr-review-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pr-url-input {
+      flex: 1;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--wt-border);
+      border-radius: var(--wt-radius);
+      background: var(--wt-surface2);
+      color: var(--wt-text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .pr-url-input:focus { border-color: var(--wt-accent); }
+    .pr-url-input::placeholder { color: var(--wt-text-muted); }
+
+    .pr-generate-btn {
+      height: 36px;
+      padding: 0 20px;
+      background: var(--wt-accent);
+      color: #1e1e2e;
+      border: none;
+      border-radius: var(--wt-radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      -webkit-app-region: no-drag;
+    }
+
+    .pr-generate-btn:hover { opacity: 0.85; }
+    .pr-generate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
     .wt-spinner {
       display: inline-block;
       width: 12px;
@@ -1105,8 +1155,9 @@
   <div id="titlebar">
     <div id="tab-bar">
       <button class="tab" onclick="switchTab('work-tracker')">Work Tracker</button>
-      <button class="tab" onclick="switchTab('github')">GitHub PRs</button>
       <button class="tab" onclick="switchTab('jira')">Jira Scanner</button>
+      <button class="tab" onclick="switchTab('github')">GitHub PRs</button>
+      <button class="tab" onclick="switchTab('pr-review')">PR Reviewer</button>
       <button id="home-btn" class="active" onclick="switchTab('home')" title="Home">⌂</button>
       <button id="settings-gear" onclick="switchTab('settings')" title="Settings">⚙</button>
     </div>
@@ -1126,6 +1177,42 @@
         <h3>Theme</h3>
         <div class="theme-grid" id="themeGrid"></div>
       </div>
+      <div class="settings-section" style="margin-top:32px">
+        <h3>Authentication</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;color:var(--text)">Jira</span>
+            <button id="settings-btn" onclick="jiraDoAuth()" title="Re-authenticate with Jira" style="height:32px;padding:0 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:13px;cursor:pointer;transition:background 0.15s;-webkit-app-region:no-drag">Re-authenticate</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;color:var(--text)">GitHub</span>
+            <button id="gh-reauth-btn" onclick="ghDoAuth()" title="Re-authenticate with GitHub" style="height:32px;padding:0 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:13px;cursor:pointer;transition:background 0.15s;-webkit-app-region:no-drag">Re-authenticate</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section" style="margin-top:32px">
+        <h3>Notifications</h3>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <label class="login-toggle" title="Launch the app automatically when you log in">
+            <div id="login-toggle-track" class="toggle-track" onclick="toggleLoginItem()">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span style="font-size:13px;color:var(--text)">Open at login</span>
+          </label>
+          <label class="login-toggle" title="Send a system notification when new Jira comments appear">
+            <div id="notif-toggle-track" class="toggle-track" onclick="toggleNotifications()">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span style="font-size:13px;color:var(--text)">Jira — new comment notifications</span>
+          </label>
+          <label class="login-toggle" title="Send a system notification when there is new activity on your GitHub PRs">
+            <div id="gh-notif-toggle-track" class="toggle-track" onclick="toggleGhNotifications()">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span style="font-size:13px;color:var(--text)">GitHub PRs — new activity notifications</span>
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1141,6 +1228,13 @@
           <div class="home-card-title">Work Tracker</div>
           <div class="home-card-desc">Generate AI-powered summaries of your contributions across GitHub and Jira</div>
         </div>
+        <div class="home-card jira" onclick="switchTab('jira')">
+          <div class="home-card-icon">
+            <img src="../jira-icon.png" width="40" height="40" style="border-radius:8px" />
+          </div>
+          <div class="home-card-title">Jira Scanner</div>
+          <div class="home-card-desc">View recent comments, open tickets, high priority issues, and more</div>
+        </div>
         <div class="home-card github" onclick="switchTab('github')">
           <div class="home-card-icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -1150,12 +1244,10 @@
           <div class="home-card-title">GitHub PRs</div>
           <div class="home-card-desc">Track your open pull requests, review threads, and comments across all repos</div>
         </div>
-        <div class="home-card jira" onclick="switchTab('jira')">
-          <div class="home-card-icon">
-            <img src="../jira-icon.png" width="40" height="40" style="border-radius:8px" />
-          </div>
-          <div class="home-card-title">Jira Scanner</div>
-          <div class="home-card-desc">View recent comments, open tickets, high priority issues, and more</div>
+        <div class="home-card pr-review" onclick="switchTab('pr-review')">
+          <div class="home-card-icon">🔍</div>
+          <div class="home-card-title">PR Reviewer</div>
+          <div class="home-card-desc">Paste a GitHub PR URL and get an AI-powered code review you can copy anywhere</div>
         </div>
       </div>
     </div>
@@ -1163,14 +1255,11 @@
 
   <div id="tab-jira" class="tab-panel">
 
-  <div id="setup-banner">
-    <h2>Connect to Jira</h2>
-    <p>Sign in with your Atlassian account to get started.</p>
-    <div class="setup-fields">
-      <button id="do-auth-btn" onclick="doAuth()" style="height:36px;padding:0 20px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag;display:flex;align-items:center;gap:8px">🔑 Sign in with Atlassian</button>
-      <button id="check-auth-btn" onclick="recheckAuth()" style="height:36px;padding:0 16px;background:var(--wt-surface2);color:var(--wt-text);border:1px solid var(--wt-border);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag">Check Auth</button>
-    </div>
-    <div id="auth-status" style="display:none;margin-top:12px;font-size:12px"></div>
+  <div id="setup-banner" class="auth-warning-banner">
+    <span class="auth-warn-icon">⚠</span>
+    <span id="auth-status-text">Not signed in to Jira. Go to <a onclick="switchTab('settings')">Settings → Authentication</a> to connect.</span>
+    <button id="check-auth-btn" onclick="recheckAuth()" style="margin-left:auto;height:26px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;-webkit-app-region:no-drag;flex-shrink:0">Check Auth</button>
+    <div id="auth-status" style="display:none"></div>
   </div>
 
   <div id="main">
@@ -1184,19 +1273,6 @@
           <option value="168">Last 7 days</option>
         </select>
       </div>
-      <label class="login-toggle" title="Launch Jira Scanner automatically when you log in">
-        <div id="login-toggle-track" class="toggle-track" onclick="toggleLoginItem()">
-          <div class="toggle-thumb"></div>
-        </div>
-        <span>Open at login</span>
-      </label>
-      <label class="login-toggle" title="Send a system notification when new comments appear">
-        <div id="notif-toggle-track" class="toggle-track" onclick="toggleNotifications()">
-          <div class="toggle-thumb"></div>
-        </div>
-        <span>Notifications</span>
-      </label>
-      <button id="settings-btn" onclick="toggleSetup()" title="Settings">⚙</button>
       <button id="run-btn" onclick="jiraResultsLoaded=false; runReport()">
         <span id="run-btn-icon">⟳</span>
         <span id="run-btn-label">Refresh Report</span>
@@ -1259,8 +1335,8 @@
         </div>
         <div class="wt-source-presets">
           <button class="wt-source active" onclick="wtSelectSource(this,'both')">Jira &amp; GitHub</button>
-          <button class="wt-source" onclick="wtSelectSource(this,'github')">GitHub only</button>
           <button class="wt-source" onclick="wtSelectSource(this,'jira')">Jira only</button>
+          <button class="wt-source" onclick="wtSelectSource(this,'github')">GitHub only</button>
         </div>
         <div id="wtJiraAuthBanner" style="display:none;margin-bottom:10px;padding:8px 10px;background:rgba(255,149,0,0.15);border:1px solid var(--wt-warning);border-radius:6px;font-size:11px;color:var(--wt-text)">
           <div style="font-weight:600;margin-bottom:4px">⚠ Jira not signed in</div>
@@ -1294,12 +1370,9 @@
   </div><!-- #tab-work-tracker -->
 
   <div id="tab-github" class="tab-panel">
-    <div id="gh-auth-banner">
-      <h2>Connect to GitHub</h2>
-      <p>Sign in with your GitHub account to view your open pull requests.</p>
-      <div class="setup-fields">
-        <button id="gh-do-auth-btn" onclick="ghDoAuth()" style="height:36px;padding:0 20px;background:var(--wt-accent);color:#1e1e2e;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;-webkit-app-region:no-drag;display:flex;align-items:center;gap:8px">🔑 Sign in with GitHub</button>
-      </div>
+    <div id="gh-auth-banner" class="auth-warning-banner">
+      <span class="auth-warn-icon">⚠</span>
+      <span>Not signed in to GitHub. Go to <a onclick="switchTab('settings')">Settings → Authentication</a> to connect.</span>
     </div>
     <div id="gh-main">
       <div id="gh-controls">
@@ -1314,6 +1387,36 @@
       <div id="gh-results"></div>
     </div>
   </div><!-- #tab-github -->
+
+  <div id="tab-pr-review" class="tab-panel">
+    <div id="pr-auth-banner" class="auth-warning-banner">
+      <span class="auth-warn-icon">⚠</span>
+      <span>Not signed in to GitHub. Go to <a onclick="switchTab('settings')">Settings → Authentication</a> to connect.</span>
+    </div>
+    <div class="wt-main">
+      <div class="pr-review-top">
+        <div class="pr-review-input-row">
+          <input
+            type="text"
+            id="prUrlInput"
+            class="pr-url-input"
+            placeholder="https://github.com/owner/repo/pull/123"
+            onkeydown="if(event.key==='Enter') prGenerateReview()"
+          />
+          <button id="prGenerateBtn" class="pr-generate-btn" onclick="prGenerateReview()">Generate Review</button>
+        </div>
+      </div>
+      <div class="wt-content" id="prContent">
+        <div class="wt-empty-state">
+          <p>Paste a GitHub PR URL above and click <strong>Generate Review</strong>.</p>
+        </div>
+      </div>
+      <div class="wt-status-bar hidden" id="prStatusBar">
+        <span class="wt-spinner"></span>
+        <span id="prStatusText">Fetching PR…</span>
+      </div>
+    </div>
+  </div><!-- #tab-pr-review -->
 
   <script>
     const { shell, ipcRenderer } = require('electron');
@@ -1347,32 +1450,41 @@
 
     function isConfigured() { return acliAuthenticated; }
 
-    function setAuthStatus(type, msg) {
-      const el = document.getElementById('auth-status');
-      el.style.display = msg ? 'block' : 'none';
-      el.style.color = type === 'error' ? 'var(--wt-danger)' : type === 'ok' ? 'var(--success)' : 'var(--wt-text-muted)';
-      el.textContent = msg;
+    function setJiraBannerText(msg) {
+      const el = document.getElementById('auth-status-text');
+      if (el) el.innerHTML = msg;
     }
 
-    async function doAuth() {
-      const btn = document.getElementById('do-auth-btn');
-      btn.disabled = true;
-      btn.textContent = '⟳ Opening Terminal…';
-      setAuthStatus('pending', '');
-      document.getElementById('auth-status').style.display = 'block';
-
-      const result = await ipcRenderer.invoke('acli-do-auth');
-      btn.disabled = false;
-      btn.textContent = '🔑 Sign in with Atlassian';
-
-      if (!result.pendingTerminal) {
-        setAuthStatus('error', 'Could not open Terminal: ' + (result.error || 'unknown error'));
-        return;
+    async function recheckAuth() {
+      const checkBtn = document.getElementById('check-auth-btn');
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'Checking…';
+      setJiraBannerText('Checking authentication…');
+      const result = await ipcRenderer.invoke('acli-check-auth');
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Check Auth';
+      if (result.ok) {
+        acliAuthenticated = true;
+        const config = await ipcRenderer.invoke('acli-get-config');
+        if (config.ok) { jiraSiteUrl = 'https://' + config.site; myAccountId = config.accountId; }
+        document.getElementById('setup-banner').classList.remove('visible');
+        runReport();
+        startPolling();
+      } else {
+        setJiraBannerText('Not signed in to Jira. Go to <a onclick="switchTab(\'settings\')">Settings → Authentication</a> to connect.');
       }
+    }
 
-      setAuthStatus('pending', 'Complete sign-in in the Terminal window…');
+    function toggleSetup() {
+      document.getElementById('setup-banner').classList.toggle('visible');
+    }
 
-      // Poll every 2s until auth succeeds, then proceed automatically
+    async function jiraDoAuth() {
+      const btn = document.getElementById('settings-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '⟳ Opening Terminal…'; }
+      const result = await ipcRenderer.invoke('acli-do-auth');
+      if (btn) { btn.disabled = false; btn.textContent = 'Re-authenticate'; }
+      if (!result.pendingTerminal) return;
       const pollTimer = setInterval(async () => {
         const authResult = await ipcRenderer.invoke('acli-check-auth');
         if (authResult.ok) {
@@ -1380,39 +1492,7 @@
           await recheckAuth();
         }
       }, 2000);
-
-      // Stop polling after 3 minutes if still not authenticated
-      setTimeout(() => {
-        clearInterval(pollTimer);
-        setAuthStatus('error', 'Timed out. Click "Check Auth" once you\'ve completed sign-in.');
-      }, 180000);
-    }
-
-    async function recheckAuth() {
-      const checkBtn = document.getElementById('check-auth-btn');
-      checkBtn.disabled = true;
-      checkBtn.textContent = 'Checking…';
-      setAuthStatus('pending', 'Checking authentication…');
-      const result = await ipcRenderer.invoke('acli-check-auth');
-      checkBtn.disabled = false;
-      checkBtn.textContent = 'Check Auth';
-      const doAuthBtn = document.getElementById('do-auth-btn');
-      if (doAuthBtn) { doAuthBtn.disabled = false; doAuthBtn.textContent = '🔑 Sign in with Atlassian'; }
-      if (result.ok) {
-        acliAuthenticated = true;
-        const config = await ipcRenderer.invoke('acli-get-config');
-        if (config.ok) { jiraSiteUrl = 'https://' + config.site; myAccountId = config.accountId; }
-        setAuthStatus('ok', '✓ Signed in successfully');
-        setTimeout(() => document.getElementById('setup-banner').classList.remove('visible'), 600);
-        runReport();
-        startPolling();
-      } else {
-        setAuthStatus('error', 'Not authenticated. Click "Sign in with Atlassian" to authenticate.');
-      }
-    }
-
-    function toggleSetup() {
-      document.getElementById('setup-banner').classList.toggle('visible');
+      setTimeout(() => clearInterval(pollTimer), 180000);
     }
 
     function openExternal(url) {
@@ -1518,7 +1598,7 @@
     function handleAcliError(errorMsg) {
       if (/unauthorized|auth login|not logged in|401/i.test(errorMsg || '')) {
         acliAuthenticated = false;
-        setAuthStatus('error', 'Session expired. Run `acli jira auth login` in your terminal, then click "Check Auth".');
+        setJiraBannerText('Session expired. Go to <a onclick="switchTab(\'settings\')">Settings → Authentication</a> to re-authenticate, then click Check Auth.');
         document.getElementById('setup-banner').classList.add('visible');
         const authErr = new Error('Not authenticated — please re-run `acli jira auth login`');
         authErr.isAuthError = true;
@@ -1870,7 +1950,7 @@
         acliAuthenticated = true;
       } else {
         document.getElementById('setup-banner').classList.add('visible');
-        setAuthStatus('error', 'Run `acli jira auth login` in your terminal to authenticate.');
+        setJiraBannerText('Not signed in to Jira. Go to <a onclick="switchTab(\'settings\')">Settings → Authentication</a> to connect.');
         return;
       }
 
@@ -1882,7 +1962,7 @@
     // ── Tab switching ─────────────────────────────────────────────────────────
 
     function switchTab(name) {
-      const tabNames = ['work-tracker', 'github', 'jira'];
+      const tabNames = ['work-tracker', 'jira', 'github', 'pr-review'];
       document.querySelectorAll('.tab').forEach((t, i) => {
         t.classList.toggle('active', tabNames[i] === name);
       });
@@ -1893,10 +1973,21 @@
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
 
-      if (name === 'settings') renderThemeGrid();
+      if (name === 'settings') { renderThemeGrid(); initLoginToggle(); initNotifToggle(); initGhNotifToggle(); }
       if (name === 'work-tracker') { wtLoadHistory(); wtCheckGhAuth(); wtCheckJiraAuth(); }
       if (name === 'jira' && acliAuthenticated && !jiraResultsLoaded) runReport();
-      if (name === 'github') { initGhAuth().then(ok => { if (ok && !ghPrsLoaded) loadGhPrs(); }); }
+      if (name === 'github') {
+        initGhNotifToggle();
+        initGhAuth().then(ok => {
+          if (ok && !ghPrsLoaded) loadGhPrs();
+          if (ok && ghNotificationsEnabled()) startGhPolling();
+        });
+      }
+      if (name === 'pr-review') {
+        ipcRenderer.invoke('wt-gh-auth-status').then(result => {
+          document.getElementById('pr-auth-banner').classList.toggle('visible', !result.ok);
+        });
+      }
     }
 
     let jiraResultsLoaded = false;
@@ -2072,14 +2163,14 @@
       const content = document.getElementById('wtContent');
       content.innerHTML = `
         <div class="wt-summary-toolbar">
-          <button class="wt-copy-btn" id="wtCopyBtn">⎘ Copy</button>
+          <button class="wt-copy-btn" id="wtCopyBtn">Copy</button>
         </div>
         <div class="wt-markdown">${marked.parse(md)}</div>`;
       document.getElementById('wtCopyBtn').addEventListener('click', () => {
         navigator.clipboard.writeText(md).then(() => {
           const b = document.getElementById('wtCopyBtn');
           b.textContent = '✓ Copied';
-          setTimeout(() => { b.textContent = '⎘ Copy'; }, 2000);
+          setTimeout(() => { b.textContent = 'Copy'; }, 2000);
         });
       });
     }
@@ -2131,18 +2222,89 @@
     }
 
     async function ghDoAuth() {
-      const btn = document.getElementById('gh-do-auth-btn');
-      btn.disabled = true;
-      btn.textContent = '⟳ Opening Terminal…';
+      const btn = document.getElementById('gh-reauth-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '⟳ Opening Terminal…'; }
       const result = await ipcRenderer.invoke('wt-gh-do-auth');
-      btn.disabled = false;
-      btn.textContent = '🔑 Sign in with GitHub';
+      if (btn) { btn.disabled = false; btn.textContent = 'Re-authenticate'; }
       if (!result.pendingTerminal) return;
       const pollTimer = setInterval(async () => {
         const ok = await initGhAuth();
         if (ok) { clearInterval(pollTimer); loadGhPrs(); }
       }, 2000);
       setTimeout(() => clearInterval(pollTimer), 180000);
+    }
+
+    function ghNotificationsEnabled() {
+      return localStorage.getItem('gh_notifications_enabled') !== 'false';
+    }
+
+    function initGhNotifToggle() {
+      document.getElementById('gh-notif-toggle-track').classList.toggle('on', ghNotificationsEnabled());
+    }
+
+    function toggleGhNotifications() {
+      const track = document.getElementById('gh-notif-toggle-track');
+      const newVal = !track.classList.contains('on');
+      track.classList.toggle('on', newVal);
+      localStorage.setItem('gh_notifications_enabled', newVal ? 'true' : 'false');
+      if (newVal) startGhPolling(); else stopGhPolling();
+    }
+
+    // activity fingerprint: map of prNumber -> { commentCount, threadCount }
+    let ghSeenActivity = null;
+    let ghPollTimer = null;
+    const GH_POLL_MS = 60 * 1000;
+
+    function startGhPolling() {
+      stopGhPolling();
+      ghPollTimer = setInterval(silentGhPoll, GH_POLL_MS);
+    }
+
+    function stopGhPolling() {
+      if (ghPollTimer) { clearInterval(ghPollTimer); ghPollTimer = null; }
+    }
+
+    async function silentGhPoll() {
+      if (!ghNotificationsEnabled() || ghRefreshing) return;
+      try {
+        const result = await ipcRenderer.invoke('gh-open-prs', { force: true });
+        if (!result.ok) return;
+        const prs = result.prs;
+
+        const current = {};
+        prs.forEach(pr => {
+          current[pr.number] = {
+            comments: (pr.comments || []).length,
+            threads: (pr.reviewThreads || []).length,
+            reviewDecision: pr.reviewDecision,
+          };
+        });
+
+        if (ghSeenActivity !== null) {
+          const newActivity = [];
+          prs.forEach(pr => {
+            const prev = ghSeenActivity[pr.number];
+            const cur = current[pr.number];
+            if (!prev) {
+              newActivity.push(`New PR: #${pr.number} ${pr.title}`);
+            } else {
+              if (cur.comments > prev.comments) newActivity.push(`New comment on #${pr.number} ${pr.title}`);
+              if (cur.threads > prev.threads) newActivity.push(`New review thread on #${pr.number} ${pr.title}`);
+              if (cur.reviewDecision !== prev.reviewDecision && cur.reviewDecision) newActivity.push(`Review decision on #${pr.number}: ${cur.reviewDecision}`);
+            }
+          });
+
+          if (newActivity.length) {
+            renderGhPrs(prs, result.fetchedAt);
+            ipcRenderer.send('notify', {
+              title: newActivity.length === 1 ? 'GitHub PR Update' : `${newActivity.length} GitHub PR Updates`,
+              body: newActivity[0] + (newActivity.length > 1 ? ` (+${newActivity.length - 1} more)` : ''),
+            });
+          }
+        }
+
+        ghSeenActivity = current;
+      } catch (_) {}
     }
 
     async function loadGhPrs(force = false) {
@@ -2160,6 +2322,16 @@
         if (!result.ok) throw new Error(result.error || 'GitHub CLI error');
         renderGhPrs(result.prs, result.fetchedAt);
         ghPrsLoaded = true;
+        if (ghSeenActivity === null) {
+          ghSeenActivity = {};
+          result.prs.forEach(pr => {
+            ghSeenActivity[pr.number] = {
+              comments: (pr.comments || []).length,
+              threads: (pr.reviewThreads || []).length,
+              reviewDecision: pr.reviewDecision,
+            };
+          });
+        }
       } catch (err) {
         document.getElementById('gh-results').innerHTML =
           `<div class="issue-list">${errorState(err.message)}</div>`;
@@ -2266,6 +2438,85 @@
           </div>
           <div class="gh-dropdown">${dropdownContent}</div>
         </div>`;
+    }
+
+    // ── PR Review ─────────────────────────────────────────────────────────────
+
+    async function prGenerateReview() {
+      const url = document.getElementById('prUrlInput').value.trim();
+      if (!url) return;
+
+      const btn = document.getElementById('prGenerateBtn');
+      const statusBar = document.getElementById('prStatusBar');
+      const statusText = document.getElementById('prStatusText');
+      const content = document.getElementById('prContent');
+
+      btn.disabled = true;
+      statusBar.classList.remove('hidden');
+      content.innerHTML = '<div class="wt-generating"><span class="wt-dot"></span><span class="wt-dot"></span><span class="wt-dot"></span></div>';
+
+      const steps = ['Fetching PR details…', 'Loading diff…', 'Generating review…'];
+      let step = 0;
+      statusText.textContent = steps[step];
+      const stepTimer = setInterval(() => { step = (step + 1) % steps.length; statusText.textContent = steps[step]; }, 2500);
+
+      try {
+        const result = await ipcRenderer.invoke('pr-generate-review', { url });
+        clearInterval(stepTimer);
+
+        if (!result.ok) {
+          statusBar.classList.add('hidden');
+          content.innerHTML = `<div class="wt-markdown"><p style="color:var(--wt-danger)">⚠ ${escHtml(result.error)}</p></div>`;
+          return;
+        }
+
+        const { marked } = require('marked');
+        content.innerHTML = `
+          <div class="wt-summary-toolbar">
+            <span style="font-size:12px;color:var(--wt-text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(result.prTitle)}</span>
+            <button class="wt-copy-btn" id="prCopyBtn">Copy</button>
+            <button class="wt-copy-btn" id="prPostBtn" style="margin-left:6px">Post to PR</button>
+          </div>
+          <div class="wt-markdown">${marked.parse(result.review)}</div>`;
+
+        document.getElementById('prCopyBtn').addEventListener('click', () => {
+          navigator.clipboard.writeText(result.review).then(() => {
+            const b = document.getElementById('prCopyBtn');
+            b.textContent = '✓ Copied';
+            setTimeout(() => { b.textContent = 'Copy'; }, 2000);
+          });
+        });
+
+        document.getElementById('prPostBtn').addEventListener('click', async () => {
+          const postBtn = document.getElementById('prPostBtn');
+          postBtn.disabled = true;
+          postBtn.textContent = 'Posting…';
+          const postResult = await ipcRenderer.invoke('pr-post-review', { url: result.prUrl, body: result.review });
+          if (postResult.ok) {
+            postBtn.textContent = '✓ Posted';
+            setTimeout(() => {
+              postBtn.disabled = false;
+              postBtn.textContent = 'Post to PR';
+            }, 3000);
+          } else {
+            postBtn.textContent = '⚠ Failed';
+            postBtn.title = postResult.error;
+            setTimeout(() => {
+              postBtn.disabled = false;
+              postBtn.textContent = 'Post to PR';
+              postBtn.title = '';
+            }, 4000);
+          }
+        });
+
+        statusBar.classList.add('hidden');
+      } catch (err) {
+        clearInterval(stepTimer);
+        statusBar.classList.add('hidden');
+        content.innerHTML = `<div class="wt-markdown"><p style="color:var(--wt-danger)">⚠ ${escHtml(err.message)}</p></div>`;
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // ── Theme system ─────────────────────────────────────────────────────────
