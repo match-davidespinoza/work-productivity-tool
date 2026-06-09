@@ -5,6 +5,7 @@
 ### Added
 - Standup Summary button in the Work Tracker sidebar — generates a concise bullet-point update (completed, in progress, blockers, next up) using the currently selected time range and data source
 - Output renders directly in the report area with the standard copy button; not saved to summary history
+- Updated app icon and menu bar tray icon to use the Mangekyou Sharingan (Kakashi) SVG; tray icon converted to B&W (white outlines on dark mode, black on light mode) with transparent background
 
 ## [2.1.0] - 2026-05-31
 
