@@ -1000,46 +1000,6 @@
     .wt-standup-btn:hover { background: rgba(203,166,247,0.1); }
     .wt-standup-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .wt-standup-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
-    }
-    .wt-standup-modal {
-      background: var(--wt-surface);
-      border: 1px solid var(--wt-border);
-      border-radius: 12px;
-      padding: 24px;
-      width: 520px;
-      max-width: 90vw;
-      display: flex; flex-direction: column; gap: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .wt-standup-header {
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .wt-standup-title {
-      font-size: 14px; font-weight: 700; color: var(--wt-accent); letter-spacing: 0.02em;
-    }
-    .wt-standup-close {
-      background: none; border: none; color: var(--wt-text-muted);
-      font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
-    }
-    .wt-standup-close:hover { color: var(--wt-text); }
-    .wt-standup-body {
-      font-size: 14px; line-height: 1.7; color: var(--wt-text);
-      white-space: pre-wrap;
-    }
-    .wt-standup-footer {
-      display: flex; justify-content: flex-end; gap: 8px;
-    }
-    .wt-standup-copy {
-      background: var(--wt-accent); color: #1e1e2e;
-      border: none; border-radius: 6px;
-      padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-    .wt-standup-copy:hover { opacity: 0.85; }
 
     .wt-history-section { flex: 1; overflow-y: auto; padding: 10px; }
     .wt-history-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--wt-text-muted); margin-bottom: 8px; }
@@ -2071,58 +2031,39 @@
     async function wtStandup() {
       const btn = document.getElementById('wtStandupBtn');
       const genBtn = document.getElementById('wtGenerateBtn');
+      const statusBar = document.getElementById('wtStatusBar');
+      const statusText = document.getElementById('wtStatusText');
+      const content = document.getElementById('wtContent');
       btn.disabled = true;
       genBtn.disabled = true;
-      btn.textContent = 'Generating…';
+      btn.innerHTML = 'Generating…';
 
       try {
-        const since = (() => {
-          const d = new Date();
-          d.setDate(d.getDate() - 7);
-          return d.toISOString().split('T')[0];
-        })();
-        const { standup } = await ipcRenderer.invoke('wt-standup', { since, until: 'present', source: wtSource });
+        const { since, until } = wtResolveRange();
+
+        statusBar.classList.remove('hidden');
+        statusText.textContent = 'Generating standup summary…';
+        content.innerHTML = '<div class="wt-generating"><span class="wt-dot"></span><span class="wt-dot"></span><span class="wt-dot"></span></div>';
+
+        const { standup } = await ipcRenderer.invoke('wt-standup', { since, until, source: wtSource });
 
         if (!standup) {
-          btn.textContent = 'No activity found';
-          setTimeout(() => { btn.textContent = 'Standup Summary'; }, 2500);
+          content.innerHTML = '<div class="wt-empty-state"><p>No activity found for the past 7 days.</p></div>';
+          statusBar.classList.add('hidden');
           return;
         }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'wt-standup-overlay';
-        overlay.innerHTML = `
-          <div class="wt-standup-modal">
-            <div class="wt-standup-header">
-              <span class="wt-standup-title">Weekly Standup</span>
-              <button class="wt-standup-close" title="Close">✕</button>
-            </div>
-            <div class="wt-standup-body">${escHtml(standup)}</div>
-            <div class="wt-standup-footer">
-              <button class="wt-standup-copy">⎘ Copy</button>
-            </div>
-          </div>`;
-
-        const close = () => overlay.remove();
-        overlay.querySelector('.wt-standup-close').addEventListener('click', close);
-        overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-        overlay.querySelector('.wt-standup-copy').addEventListener('click', () => {
-          navigator.clipboard.writeText(standup).then(() => {
-            const b = overlay.querySelector('.wt-standup-copy');
-            b.textContent = '✓ Copied';
-            setTimeout(() => { b.textContent = '⎘ Copy'; }, 2000);
-          });
-        });
-
-        document.getElementById('tab-work-tracker').appendChild(overlay);
+        wtShowSummary(standup);
+        statusBar.classList.add('hidden');
       } catch (err) {
-        btn.textContent = 'Error — retry';
-        setTimeout(() => { btn.textContent = 'Standup Summary'; }, 3000);
+        statusBar.classList.remove('hidden');
+        statusText.textContent = `Error: ${err.message}`;
+        content.innerHTML = `<div class="wt-markdown"><p style="color:var(--wt-danger)">${escHtml(err.message)}</p></div>`;
         console.error(err);
       } finally {
         btn.disabled = false;
         genBtn.disabled = false;
-        if (btn.textContent === 'Generating…') btn.textContent = 'Standup Summary';
+        btn.innerHTML = 'Standup Summary';
       }
     }
 
